@@ -1,0 +1,17 @@
+{
+  "name": "AtkıGetir",
+  "short_name": "AtkıGetir",
+  "description": "Kişiye ve firmaya özel şal, atkı ve bayrak üretimi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/images/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+} 

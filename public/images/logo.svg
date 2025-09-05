@@ -1,0 +1,19 @@
+<svg width="200" height="80" viewBox="0 0 200 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Koyu mavi arka plan -->
+  <rect width="200" height="80" fill="#1e3a8a"/>
+  
+  <!-- Ana figür - insan figürü -->
+  <path d="M40 60 L40 20 L50 15 L60 20 L60 60 L50 65 Z" fill="white"/>
+  
+  <!-- Pankart/Atkı -->
+  <rect x="45" y="10" width="10" height="8" fill="white"/>
+  
+  <!-- Megafon simgesi -->
+  <path d="M35 25 L45 25 L50 30 L50 35 L45 40 L35 40 L30 35 L30 30 Z" fill="white"/>
+  <path d="M30 32 L25 32 L25 33 L30 33 Z" fill="white"/>
+  <path d="M30 34 L25 34 L25 35 L30 35 Z" fill="white"/>
+  <path d="M30 36 L25 36 L25 37 L30 37 Z" fill="white"/>
+  
+  <!-- Atkigetir yazısı -->
+  <text x="100" y="45" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white" text-anchor="middle">Atkigetir</text>
+</svg> 

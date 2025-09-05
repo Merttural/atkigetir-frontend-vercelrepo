@@ -1,0 +1,59 @@
+{
+  "name": "atkigetir-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "analyze": "ANALYZE=true npm run build",
+    "export": "next export",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.1.11",
+    "critters": "^0.0.23",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.536.0",
+    "next": "15.3.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hot-toast": "^2.4.1"
+  },
+  "devDependencies": {
+    "@next/bundle-analyzer": "^15.3.5",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "15.3.5",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "description": "Atkigetir Frontend - Next.js E-commerce Platform",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Merttural/atki.git"
+  },
+  "keywords": [
+    "nextjs",
+    "react",
+    "ecommerce",
+    "frontend",
+    "atkigetir"
+  ],
+  "author": "Atkigetir",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Merttural/atki/issues"
+  },
+  "homepage": "https://github.com/Merttural/atki#readme"
+}
