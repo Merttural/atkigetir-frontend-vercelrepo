@@ -1,32 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
-  "env": {
-    "NEXT_PUBLIC_API_URL": "@api_url",
-    "NEXT_PUBLIC_BASE_URL": "@base_url",
-    "NEXT_PUBLIC_SITE_NAME": "Atkigetir",
-    "NEXT_PUBLIC_SITE_DESCRIPTION": "Kaliteli atkı ve bere ürünleri"
-  },
-  "functions": {
-    "frontend/src/pages/api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
