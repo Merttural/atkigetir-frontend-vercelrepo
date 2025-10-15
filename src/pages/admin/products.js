@@ -456,10 +456,10 @@ function AdminProducts() {
                                     <div className="flex-shrink-0 h-10 w-10">
                                       <img
                               className="h-10 w-10 rounded object-cover"
-                              src={product.image || '/images/placeholder.jpg'}
+                              src={product.image || '/images/placeholder.svg'}
                               alt={product.name}
                               onError={(e) => {
-                                e.target.src = '/images/placeholder.jpg';
+                                e.target.src = '/images/placeholder.svg';
                               }}
                             />
                           </div>

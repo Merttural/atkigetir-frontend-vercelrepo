@@ -18,7 +18,19 @@ const nextConfig = {
   //   appDir: false
   // },
   images: {
-    domains: ['localhost', 'atkigetir-backend.onrender.com'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'atkigetir-backend.onrender.com',
+        pathname: '/uploads/**',
+      },
+    ],
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -27,7 +39,8 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     // Performance optimizations
-    loader: 'default'
+    loader: 'default',
+    quality: 85
   },
   compress: true,
   poweredByHeader: false,
