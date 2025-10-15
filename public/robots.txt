@@ -32,6 +32,8 @@ Allow: /iletisim
 Allow: /sepet
 Allow: /odeme
 Allow: /blog/
+Allow: /newsletter
+Allow: /partnerlik
 Allow: /sss
 Allow: /gizlilik
 Allow: /kosullar

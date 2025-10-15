@@ -8,18 +8,37 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ToastContainer from '../components/Toast';
 import { AuthProvider } from '../contexts/AuthContext';
+import Script from 'next/script';
+import * as gtag from '../utils/gtag';
+import { useWebVitals } from '../hooks/useWebVitals';
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   
+  // Web Vitals tracking
+  useWebVitals();
+  
   useEffect(() => {
     setMounted(true);
+    
+    // Google Analytics page tracking
+    const handleRouteChange = (url) => {
+      gtag.pageview(url);
+    };
+    
+    router.events.on('routeChangeComplete', handleRouteChange);
     
     // Global error handler
     const handleError = (error) => {
       console.error('Global error:', error);
       // Error'u loglama servisine gönderebilirsiniz
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'exception', {
+          description: error.message,
+          fatal: false
+        });
+      }
     };
 
     // Global unhandled promise rejection handler
@@ -32,6 +51,7 @@ export default function App({ Component, pageProps }) {
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
     return () => {
+      router.events.off('routeChangeComplete', handleRouteChange);
       window.removeEventListener('error', handleError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
     };
@@ -56,6 +76,32 @@ export default function App({ Component, pageProps }) {
           <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png" />
           <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png" />
         </Head>
+
+        {/* Google Analytics */}
+        {gtag.GA_TRACKING_ID && (
+          <>
+            <Script
+              strategy="afterInteractive"
+              src={`https://www.googletagmanager.com/gtag/js?id=${gtag.GA_TRACKING_ID}`}
+            />
+            <Script
+              id="google-analytics"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', '${gtag.GA_TRACKING_ID}', {
+                    page_path: window.location.pathname,
+                    anonymize_ip: true,
+                    cookie_flags: 'SameSite=None;Secure'
+                  });
+                `,
+              }}
+            />
+          </>
+        )}
         {isAdmin ? (
           <AdminLayout>
             <Component {...pageProps} />
