@@ -123,11 +123,12 @@ export default function RandomProducts() {
                 </Link>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {productsToDisplay.slice(0, 4).map((product) => (
+                {productsToDisplay.slice(0, 4).map((product, index) => (
                   <ProductCard
                     key={product._id}
                     product={product}
                     showCategoryBadge={true}
+                    priority={index === 0} // İlk ürün için priority
                   />
                 ))}
               </div>

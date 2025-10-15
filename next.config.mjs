@@ -22,10 +22,12 @@ const nextConfig = {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    unoptimized: process.env.NODE_ENV === 'development', // Production'da optimize et
-    minimumCacheTTL: 60,
+    unoptimized: process.env.NODE_ENV === 'development',
+    minimumCacheTTL: 31536000, // 1 yıl cache
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Performance optimizations
+    loader: 'default'
   },
   compress: true,
   poweredByHeader: false,
@@ -37,22 +39,52 @@ const nextConfig = {
     optimizeCss: true, // CSS optimizasyonu aktif
     scrollRestoration: true,
     optimizePackageImports: ['@heroicons/react', 'lucide-react'],
+    // Core Web Vitals optimizations
+    largePageDataBytes: 128 * 1000, // 128KB
+    // Modern bundling
+    esmExternals: true,
   },
   
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
     // Production optimizations
     if (!dev && !isServer) {
+      // Advanced code splitting
       config.optimization.splitChunks = {
         chunks: 'all',
+        minSize: 20000,
+        maxSize: 244000,
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
             chunks: 'all',
+            priority: 10,
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 5,
+            reuseExistingChunk: true,
           },
         },
       };
+      
+      // Tree shaking optimization
+      config.optimization.usedExports = true;
+      config.optimization.sideEffects = false;
+    }
+    
+    // Bundle analyzer for development
+    if (process.env.ANALYZE === 'true') {
+      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'server',
+          openAnalyzer: true,
+        })
+      );
     }
     
     return config;
@@ -96,6 +128,33 @@ const nextConfig = {
       },
       {
         source: '/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      },
+      {
+        source: '/images/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      },
+      {
+        source: '/_next/image(.*)',
         headers: [
           {
             key: 'Cache-Control',

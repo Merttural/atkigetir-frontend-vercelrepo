@@ -1,22 +1,49 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-export default function ProductCard({ product, showCategoryBadge }) {
+export default function ProductCard({ product, showCategoryBadge, priority = false }) {
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageLoad = useCallback(() => {
+    setImageLoading(false);
+  }, []);
+
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+    setImageLoading(false);
+  }, []);
+
   if (!product) return null;
 
   return (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 overflow-hidden group">
       <Link href={`/urunler/${product.slug || product._id}`} className="block">
         <div className="relative aspect-square overflow-hidden bg-gray-100">
+          {imageLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          )}
           <Image
             src={product.image || '/images/placeholder.svg'}
             alt={product.name}
             fill
-            className="object-cover transition-opacity duration-300"
-            priority={false}
+            className={`object-cover transition-opacity duration-300 ${
+              imageLoading ? 'opacity-0' : 'opacity-100'
+            }`}
+            onLoad={handleImageLoad}
+            onError={handleImageError}
+            priority={priority}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={85}
           />
+          {imageError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
+              <span className="text-gray-500 text-sm">Resim yüklenemedi</span>
+            </div>
+          )}
           {showCategoryBadge && product.category && (
             <div className="absolute top-2 left-2">
               <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full font-medium">

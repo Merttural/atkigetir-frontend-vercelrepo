@@ -66,6 +66,18 @@ export default function SEO({
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       <meta name="apple-mobile-web-app-title" content={siteName} />
       
+      {/* Performance Meta Tags */}
+      <meta name="format-detection" content="telephone=no" />
+      <meta name="mobile-web-app-capable" content="yes" />
+      <meta name="application-name" content={siteName} />
+      <meta name="msapplication-config" content="/browserconfig.xml" />
+      
+      {/* Preload Critical Resources */}
+      <link rel="preload" href="/images/logo.svg" as="image" type="image/svg+xml" />
+      <link rel="preload" href="/_next/static/css/app.css" as="style" />
+      <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+      <link rel="dns-prefetch" href="//www.google-analytics.com" />
+      
       {/* Structured Data */}
       {structuredData && (
         <script
