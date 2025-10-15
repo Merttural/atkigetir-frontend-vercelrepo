@@ -7,30 +7,43 @@ export default function SEO({
   image, 
   url, 
   type = 'website',
-  noindex = false 
+  noindex = false,
+  structuredData = null,
+  canonical = null
 }) {
-  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || 'Atkigetir';
-  const siteDescription = process.env.NEXT_PUBLIC_SITE_DESCRIPTION || 'Kaliteli atkı ve bere ürünleri';
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com';
+  const siteName = 'Atkigetir';
+  const siteDescription = 'Türkiye\'nin en kaliteli atkı, bere, forma ve bayrak ürünleri. Kişiye özel tasarım, hızlı kargo, güvenli alışveriş.';
+  const baseUrl = 'https://atkigetir.com';
   
-  const fullTitle = title ? `${title} - ${siteName}` : siteName;
+  const fullTitle = title ? `${title} - ${siteName}` : `${siteName} | Kaliteli Atkı ve Bere Ürünleri`;
   const fullDescription = description || siteDescription;
   const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
   const fullImage = image ? `${baseUrl}${image}` : `${baseUrl}/images/logo.svg`;
+  const canonicalUrl = canonical || fullUrl;
 
   return (
     <Head>
       {/* Basic Meta Tags */}
       <title>{fullTitle}</title>
       <meta name="description" content={fullDescription} />
-      <meta name="keywords" content={keywords || 'atkı, bere, kış, sıcak, moda, aksesuar'} />
+      <meta name="keywords" content={keywords || 'atkı, atkı modelleri, atkı fiyatları, kışlık atkı, şal atkı, dokuma atkı, bere, forma, bayrak, kişiye özel tasarım, kaliteli atkı'} />
       <meta name="author" content={siteName} />
       <meta name="robots" content={noindex ? 'noindex,nofollow' : 'index,follow'} />
+      <link rel="canonical" href={canonicalUrl} />
+      
+      {/* Language and Locale */}
+      <meta httpEquiv="content-language" content="tr" />
+      <meta name="language" content="Turkish" />
+      <meta name="geo.region" content="TR" />
+      <meta name="geo.placename" content="İstanbul" />
       
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={fullDescription} />
       <meta property="og:image" content={fullImage} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={title || siteName} />
       <meta property="og:url" content={fullUrl} />
       <meta property="og:type" content={type} />
       <meta property="og:site_name" content={siteName} />
@@ -41,17 +54,27 @@ export default function SEO({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={fullDescription} />
       <meta name="twitter:image" content={fullImage} />
+      <meta name="twitter:image:alt" content={title || siteName} />
+      <meta name="twitter:site" content="@atkigetir" />
+      <meta name="twitter:creator" content="@atkigetir" />
       
       {/* Additional Meta Tags */}
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <meta name="theme-color" content="#dc2626" />
-      <meta name="msapplication-TileColor" content="#dc2626" />
+      <meta name="theme-color" content="#2563eb" />
+      <meta name="msapplication-TileColor" content="#2563eb" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       <meta name="apple-mobile-web-app-title" content={siteName} />
       
-      {/* Canonical URL */}
-      <link rel="canonical" href={fullUrl} />
+      {/* Structured Data */}
+      {structuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData)
+          }}
+        />
+      )}
       
       {/* Favicon */}
       <link rel="icon" href="/images/logo.svg" type="image/svg+xml" />

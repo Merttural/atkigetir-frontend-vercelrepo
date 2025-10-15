@@ -1,51 +1,39 @@
 import React, { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
 import LoadingSpinner from "./LoadingSpinner";
+import Link from "next/link";
 
-export default function FeaturedProducts() {
+export default function RandomProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchRandomProducts = async () => {
       try {
         setLoading(true);
         setError(null);
-        
-        const response = await fetch('http://localhost:5000/api/products?featured=true');
-        
+
+        const response = await fetch('/api/products/random/');
         if (!response.ok) {
-          throw new Error('Ürünler yüklenirken hata oluştu');
+          throw new Error('Rastgele ürünler yüklenirken hata oluştu');
         }
-        
         const data = await response.json();
-        
-        if (data.products && data.products.length > 0) {
-          // En fazla 8 ürün göster
-          setProducts(data.products.slice(0, 8));
+        if (data.success && data.products && data.products.length > 0) {
+          setProducts(data.products);
         } else {
-          // Eğer featured ürün yoksa, tüm ürünlerden ilk 8'ini al
-          const allProductsResponse = await fetch('http://localhost:5000/api/products');
-          const allProductsData = await allProductsResponse.json();
-          
-          if (allProductsData.products && allProductsData.products.length > 0) {
-            setProducts(allProductsData.products.slice(0, 8));
-          } else {
-            setProducts([]);
-          }
+          setProducts([]);
         }
-      } catch (error) {
-        console.error('Ürünler yüklenirken hata:', error);
-        setError('Ürünler yüklenirken bir hata oluştu');
-        // Hata durumunda boş array set et
+      } catch (err) {
+        console.error("Rastgele ürünler yüklenirken hata:", err);
+        setError("Ürünler yüklenirken bir hata oluştu.");
         setProducts([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    fetchRandomProducts();
   }, []);
 
   if (loading) {
@@ -54,7 +42,7 @@ export default function FeaturedProducts() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Öne Çıkan Ürünler</h2>
-            <p className="text-gray-600">En popüler ürünlerimizi keşfedin</p>
+            <p className="text-gray-600">Sizin için seçtiklerimiz...</p>
           </div>
           <div className="flex justify-center">
             <LoadingSpinner size="lg" text="Ürünler yükleniyor..." />
@@ -71,8 +59,8 @@ export default function FeaturedProducts() {
           <div className="text-center">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Öne Çıkan Ürünler</h2>
             <p className="text-red-600 mb-4">{error}</p>
-            <button 
-              onClick={() => window.location.reload()} 
+            <button
+              onClick={() => window.location.reload()}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
             >
               Tekrar Dene
@@ -96,34 +84,67 @@ export default function FeaturedProducts() {
     );
   }
 
+  // Ürünleri kategoriye göre grupla
+  const categoryMap = {
+    'atkı': 'Atkı',
+    'forma': 'Forma', 
+    'bere': 'Bere',
+    'bayrak': 'Bayrak'
+  };
+
+  const categoriesOrder = ['atkı', 'forma', 'bere', 'bayrak'];
+  
+  const groupedProducts = categoriesOrder.reduce((acc, category) => {
+    acc[category] = products.filter(p => p.category && p.category.toLowerCase() === category.toLowerCase());
+    return acc;
+  }, {});
+
   return (
     <section className="py-12 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Öne Çıkan Ürünler</h2>
-          <p className="text-gray-600">En popüler ürünlerimizi keşfedin</p>
+          <p className="text-gray-600">Her kategoriden seçtiklerimiz</p>
         </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <ProductCard 
-              key={product._id} 
-              product={product} 
-              showCategoryBadge={true}
-            />
-          ))}
-        </div>
-        
+
+        {categoriesOrder.map(category => {
+          const productsToDisplay = groupedProducts[category];
+          if (!productsToDisplay || productsToDisplay.length === 0) return null;
+
+          return (
+            <div key={category} className="mb-12">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-800">{categoryMap[category]} Ürünleri</h3>
+                <Link 
+                  href={`/urunler/${category}`} 
+                  className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                >
+                  Tüm {categoryMap[category]}leri Gör →
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {productsToDisplay.slice(0, 4).map((product) => (
+                  <ProductCard
+                    key={product._id}
+                    product={product}
+                    showCategoryBadge={true}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+
         <div className="text-center mt-8">
-          <a 
-            href="/urunler" 
+          <Link 
+            href="/urunler"
             className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
           >
             Tüm Ürünleri Gör
             <span className="ml-2">→</span>
-          </a>
+          </Link>
         </div>
       </div>
     </section>
   );
-} 
+}

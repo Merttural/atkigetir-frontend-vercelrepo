@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { withAdminAuth } from '@/components/withAuth';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -40,11 +41,49 @@ function AdminProducts() {
     fetchProducts();
   }, []);
 
+  // Drag & Drop Handler
+  const handleDragEnd = async (result) => {
+    if (!result.destination) return;
+
+    const items = Array.from(products);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Optimistic update
+    setProducts(items);
+
+    // Update order in database
+    try {
+      const updates = items.map((product, index) => ({
+        _id: product._id,
+        orderRank: index + 1
+      }));
+
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/admin/products/order`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ updates })
+      });
+
+      if (!response.ok) {
+        throw new Error('Sıralama güncellenemedi');
+      }
+    } catch (error) {
+      console.error('Sıralama hatası:', error);
+      // Revert on error
+      fetchProducts();
+    }
+  };
+
   const fetchProducts = async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('https://atkigetir-backend.onrender.com/api/products');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const res = await fetch(`${apiUrl}/api/products?sort=orderRank`);
       if (!res.ok) {
         throw new Error('API yanıtı başarısız');
       }
@@ -354,37 +393,68 @@ function AdminProducts() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Ürün
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Kategori
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Fiyat
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Stok
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Durum
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      İşlemler
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredProducts.map((product) => (
-                    <tr key={product._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
-                            <img
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                        Sıra
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Ürün
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Kategori
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Fiyat
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Stok
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Durum
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        İşlemler
+                      </th>
+                    </tr>
+                  </thead>
+                  <Droppable droppableId="products">
+                    {(provided) => (
+                      <tbody 
+                        className="bg-white divide-y divide-gray-200"
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                      >
+                        {filteredProducts.map((product, index) => (
+                          <Draggable key={product._id} draggableId={product._id} index={index}>
+                            {(provided, snapshot) => (
+                              <tr 
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                className={`hover:bg-gray-50 ${snapshot.isDragging ? 'bg-blue-50 shadow-lg' : ''}`}
+                              >
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="flex items-center">
+                                    <div 
+                                      {...provided.dragHandleProps}
+                                      className="cursor-move p-1 text-gray-400 hover:text-gray-600"
+                                    >
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                                      </svg>
+                                    </div>
+                                    <span className="ml-2 text-sm font-medium text-gray-900">
+                                      {product.orderRank || index + 1}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="flex items-center">
+                                    <div className="flex-shrink-0 h-10 w-10">
+                                      <img
                               className="h-10 w-10 rounded object-cover"
                               src={product.image || '/images/placeholder.jpg'}
                               alt={product.name}
@@ -441,11 +511,17 @@ function AdminProducts() {
                           Sil
                         </button>
                       </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                              </tr>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </tbody>
+                    )}
+                  </Droppable>
+                </table>
+              </div>
+            </DragDropContext>
           )}
         </div>
 

@@ -16,6 +16,8 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
+    "@tailwindcss/line-clamp": "^0.4.4",
     "@tailwindcss/postcss": "^4.1.11",
     "critters": "^0.0.23",
     "jwt-decode": "^4.0.0",

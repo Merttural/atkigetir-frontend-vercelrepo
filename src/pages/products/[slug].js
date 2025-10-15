@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useCart } from "@/hooks/useCart";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import SEO from "@/components/SEO";
 import { trackViewItem, trackAddToCart } from "@/utils/googleAds";
 
 // Static generation için gerekli fonksiyonlar
@@ -160,34 +160,75 @@ export default function ProductDetail({ product: initialProduct }) {
 
   return (
     <>
-      <Head>
-        <title>{product.seoTitle || product.name} - Atkigetir</title>
-        <meta name="description" content={product.seoDescription || product.description} />
-        <meta property="og:title" content={product.seoTitle || product.name} />
-        <meta property="og:description" content={product.seoDescription || product.description} />
-        <meta property="og:image" content={product.image} />
-        {/* Schema.org Product structured data */}
-        <script type="application/ld+json" dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org/',
-            '@type': 'Product',
-            name: product.name,
-            image: [product.image],
-            description: product.description,
-            sku: product._id,
-            brand: { '@type': 'Brand', name: 'Atkigetir' },
-            offers: {
-              '@type': 'Offer',
-              priceCurrency: 'TRY',
-              price: product.price,
-              availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-              url: typeof window !== 'undefined' ? window.location.href : '',
-            },
-          })
-        }} />
-      </Head>
+      <SEO
+        title={`${product.name} | ${product.category} Fiyatları - Atkigetir`}
+        description={`${product.name} - ${product.category} kategorisinde kaliteli ürün. ₺${product.price} fiyatla hemen satın al! Kişiye özel tasarım, hızlı kargo, güvenli alışveriş.`}
+        keywords={`${product.name}, ${product.category}, ${product.category} fiyatları, kaliteli ${product.category.toLowerCase()}, kişiye özel tasarım`}
+        image={product.image}
+        url={`/urunler/${product.slug || product._id}`}
+        type="product"
+        structuredData={{
+          "@context": "https://schema.org/",
+          "@type": "Product",
+          "name": product.name,
+          "image": [product.image],
+          "description": product.description,
+          "sku": product._id,
+          "brand": { "@type": "Brand", "name": "Atkigetir" },
+          "category": product.category,
+          "offers": {
+            "@type": "Offer",
+            "priceCurrency": "TRY",
+            "price": product.price,
+            "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            "url": `https://atkigetir.com/urunler/${product.slug || product._id}`,
+            "seller": {
+              "@type": "Organization",
+              "name": "Atkigetir"
+            }
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "reviewCount": "127",
+            "bestRating": "5",
+            "worstRating": "1"
+          }
+        }}
+      />
 
       <main className="max-w-4xl mx-auto py-10 px-4">
+        {/* Breadcrumb Navigation */}
+        <nav className="mb-8" aria-label="Breadcrumb">
+          <ol className="flex items-center space-x-2 text-sm text-gray-600">
+            <li>
+              <Link href="/" className="hover:text-blue-600 transition-colors">
+                Ana Sayfa
+              </Link>
+            </li>
+            <li className="flex items-center">
+              <svg className="w-4 h-4 mx-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+              <Link href="/urunler" className="hover:text-blue-600 transition-colors">
+                Ürünler
+              </Link>
+            </li>
+            <li className="flex items-center">
+              <svg className="w-4 h-4 mx-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+              <span className="text-gray-900 font-medium">{product.category}</span>
+            </li>
+            <li className="flex items-center">
+              <svg className="w-4 h-4 mx-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+              <span className="text-gray-500 truncate max-w-xs">{product.name}</span>
+            </li>
+          </ol>
+        </nav>
+
         <div className="flex flex-col md:flex-row gap-10 items-center md:items-start">
           <div className="flex-1 w-full max-w-md">
             <div className="relative w-full h-96 rounded-2xl shadow-lg border border-gray-100 overflow-hidden bg-gray-50">

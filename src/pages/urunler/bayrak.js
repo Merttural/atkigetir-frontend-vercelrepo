@@ -11,7 +11,7 @@ export default function BayrakPage() {
   useEffect(() => {
     setLoading(true);
     setError("");
-    fetch('https://atkigetir-backend.onrender.com/api/products')
+    fetch('http://localhost:5000/api/products')
       .then(res => res.json())
       .then(data => {
         // Sadece Bayrak kategorisindeki ürünleri filtrele

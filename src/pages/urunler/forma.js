@@ -11,7 +11,7 @@ export default function FormaPage() {
   useEffect(() => {
     setLoading(true);
     setError("");
-    fetch('https://atkigetir-backend.onrender.com/api/products')
+    fetch('http://localhost:5000/api/products')
       .then(res => res.json())
       .then(data => {
         // Sadece Forma kategorisindeki ürünleri filtrele
