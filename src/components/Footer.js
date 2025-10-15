@@ -41,6 +41,12 @@ export default function Footer() {
           <Link href="/blog" className="hover:underline hover:text-yellow-600 transition-colors">
             Blog
           </Link>
+          <Link href="/newsletter" className="hover:underline hover:text-yellow-600 transition-colors">
+            Newsletter
+          </Link>
+          <Link href="/partnerlik" className="hover:underline hover:text-yellow-600 transition-colors">
+            Partnerlik
+          </Link>
           <Link href="/sss" className="hover:underline hover:text-yellow-600 transition-colors">
             SSS
           </Link>
@@ -64,16 +70,16 @@ export default function Footer() {
 
         {/* Sosyal Medya */}
         <div className="flex items-center gap-5">
-          <a href="https://www.facebook.com/atkigetir" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="hover:scale-110 transition">
+          <a href="https://www.facebook.com/atkigetir" target="_blank" rel="noopener noreferrer" aria-label="Facebook - Atkigetir" className="hover:scale-110 transition" title="Atkigetir Facebook Sayfası">
             <FacebookIcon className="w-6 h-6 text-blue-600 hover:text-blue-800" />
           </a>
-          <a href="https://www.instagram.com/atkigetir/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="hover:scale-110 transition">
+          <a href="https://www.instagram.com/atkigetir/" target="_blank" rel="noopener noreferrer" aria-label="Instagram - Atkigetir" className="hover:scale-110 transition" title="Atkigetir Instagram Hesabı">
             <InstagramIcon className="w-6 h-6 text-pink-500 hover:text-pink-600" />
           </a>
-          <a href="https://t.me/atkigetir" target="_blank" rel="noopener noreferrer" aria-label="Telegram" className="hover:scale-110 transition">
+          <a href="https://t.me/atkigetir" target="_blank" rel="noopener noreferrer" aria-label="Telegram - Atkigetir" className="hover:scale-110 transition" title="Atkigetir Telegram Kanalı">
             <TelegramIcon className="w-6 h-6 text-sky-500 hover:text-sky-600" />
           </a>
-          <a href="https://wa.me/905337498266" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="hover:scale-110 transition">
+          <a href="https://wa.me/905337498266?text=Merhabalar%20Kerim%20Bey%20Sipariş%20Vermek%20istiyorum." target="_blank" rel="noopener noreferrer" aria-label="WhatsApp - Atkigetir" className="hover:scale-110 transition" title="Atkigetir WhatsApp İletişim">
             <WhatsappIcon className="w-6 h-6 text-green-600 hover:text-green-700" />
           </a>
         </div>

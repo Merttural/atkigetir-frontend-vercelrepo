@@ -61,12 +61,27 @@
     <priority>0.8</priority>
   </url>
   
-  <url>
-    <loc>https://atkigetir.com/blog/atki-seciminde-dikkat-edilecekler</loc>
-    <lastmod>2025-01-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
+         <url>
+           <loc>https://atkigetir.com/blog/atki-seciminde-dikkat-edilecekler</loc>
+           <lastmod>2025-01-15</lastmod>
+           <changefreq>monthly</changefreq>
+           <priority>0.8</priority>
+         </url>
+         
+         <!-- Newsletter ve Partnerlik -->
+         <url>
+           <loc>https://atkigetir.com/newsletter</loc>
+           <lastmod>2025-01-15</lastmod>
+           <changefreq>monthly</changefreq>
+           <priority>0.6</priority>
+         </url>
+         
+         <url>
+           <loc>https://atkigetir.com/partnerlik</loc>
+           <lastmod>2025-01-15</lastmod>
+           <changefreq>monthly</changefreq>
+           <priority>0.7</priority>
+         </url>
   
   <url>
     <loc>https://atkigetir.com/sss</loc>
