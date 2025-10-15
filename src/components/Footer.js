@@ -19,9 +19,13 @@ export default function Footer() {
               <MailIcon className="w-5 h-5 text-gray-600" />
               info@atkigetir.com
             </a>
-            <a href="https://wa.me/905337498266" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:underline">
+            <a href="https://wa.me/905337498266?text=Merhabalar%20Kerim%20Bey%20Sipariş%20Vermek%20istiyorum." target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:underline">
               <WhatsappIcon className="w-5 h-5 text-green-600" />
               0533 749 82 66
+            </a>
+            <a href="tel:+905337498266" className="flex items-center gap-1 hover:underline">
+              <span className="text-blue-600">📞</span>
+              Ara
             </a>
           </div>
         </div>

@@ -12,11 +12,8 @@ export default function AnnouncementBar() {
 <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         {/* Sol taraf - iletişim numaraları */}
         <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-medium">
-          <a href="https://wa.me/905337498266" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:underline">
+          <a href="https://wa.me/905337498266?text=Merhabalar%20Kerim%20Bey%20Sipariş%20Vermek%20istiyorum." target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:underline">
             <WhatsappIcon className="w-4 h-4 text-green-600" /> 0533 749 82 66
-          </a>
-          <a href="https://wa.me/905322514352" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:underline">
-            <WhatsappIcon className="w-4 h-4 text-green-600" /> 0532 251 43 52
           </a>
           <a href="tel:02122253129" className="flex items-center gap-1 hover:underline">
             <PhoneIcon className="w-4 h-4 text-blue-400" /> 0212 225 31 29
