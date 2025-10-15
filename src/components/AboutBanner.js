@@ -23,7 +23,7 @@ export default function AboutBanner() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
-              href="tel:05322514352"
+              href="tel:05337498266"
               className="inline-flex items-center justify-center bg-white text-blue-700 font-semibold px-6 py-3 rounded-full shadow hover:bg-blue-100 transition-all duration-200 text-base"
             >
               <span role="img" aria-label="phone" className="mr-2">📞</span> Hemen Ara

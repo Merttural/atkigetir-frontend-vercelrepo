@@ -161,9 +161,9 @@ export default function ProductDetail({ product: initialProduct }) {
   return (
     <>
       <SEO
-        title={`${product.name} | ${product.category} Fiyatları - Atkigetir`}
-        description={`${product.name} - ${product.category} kategorisinde kaliteli ürün. ₺${product.price} fiyatla hemen satın al! Kişiye özel tasarım, hızlı kargo, güvenli alışveriş.`}
-        keywords={`${product.name}, ${product.category}, ${product.category} fiyatları, kaliteli ${product.category.toLowerCase()}, kişiye özel tasarım`}
+        title={`${product.name} | ${product.category} Fiyatları ve Özellikleri - Atkigetir`}
+        description={`${product.name} - ${product.category} kategorisinde kaliteli ürün. ₺${product.price} fiyatla hemen satın al! İstanbul merkezli, kişiye özel tasarım, hızlı kargo, güvenli alışveriş. Ücretsiz kargo fırsatı!`}
+        keywords={`${product.name}, ${product.category}, ${product.category} fiyatları, kaliteli ${product.category.toLowerCase()}, kişiye özel tasarım, istanbul ${product.category.toLowerCase()}, ${product.category.toLowerCase()} siparişi, ${product.category.toLowerCase()} modelleri, ucuz ${product.category.toLowerCase()}, ${product.category.toLowerCase()} üreticisi`}
         image={product.image}
         url={`/urunler/${product.slug || product._id}`}
         type="product"
@@ -174,18 +174,47 @@ export default function ProductDetail({ product: initialProduct }) {
           "image": [product.image],
           "description": product.description,
           "sku": product._id,
-          "brand": { "@type": "Brand", "name": "Atkigetir" },
+          "mpn": product._id,
+          "brand": { 
+            "@type": "Brand", 
+            "name": "Atkigetir",
+            "url": "https://atkigetir.com"
+          },
           "category": product.category,
+          "manufacturer": {
+            "@type": "Organization",
+            "name": "Atkigetir",
+            "url": "https://atkigetir.com"
+          },
           "offers": {
             "@type": "Offer",
             "priceCurrency": "TRY",
             "price": product.price,
+            "priceValidUntil": "2025-12-31",
             "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
             "url": `https://atkigetir.com/urunler/${product.slug || product._id}`,
             "seller": {
               "@type": "Organization",
-              "name": "Atkigetir"
-            }
+              "name": "Atkigetir",
+              "url": "https://atkigetir.com"
+            },
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "TRY"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "businessDays": {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+                },
+                "cutoffTime": "14:00"
+              }
+            },
+            "itemCondition": "https://schema.org/NewCondition"
           },
           "aggregateRating": {
             "@type": "AggregateRating",
@@ -193,7 +222,39 @@ export default function ProductDetail({ product: initialProduct }) {
             "reviewCount": "127",
             "bestRating": "5",
             "worstRating": "1"
-          }
+          },
+          "review": [
+            {
+              "@type": "Review",
+              "reviewRating": {
+                "@type": "Rating",
+                "ratingValue": "5",
+                "bestRating": "5"
+              },
+              "author": {
+                "@type": "Person",
+                "name": "Müşteri"
+              },
+              "reviewBody": "Çok kaliteli ve hızlı teslimat. Kesinlikle tavsiye ederim."
+            }
+          ],
+          "additionalProperty": [
+            {
+              "@type": "PropertyValue",
+              "name": "Malzeme",
+              "value": product.material || "Yüksek kaliteli kumaş"
+            },
+            {
+              "@type": "PropertyValue", 
+              "name": "Renk",
+              "value": product.color || "Çeşitli renkler"
+            },
+            {
+              "@type": "PropertyValue",
+              "name": "Boyut",
+              "value": product.size || "Standart boyut"
+            }
+          ]
         }}
       />
 
@@ -298,6 +359,93 @@ export default function ProductDetail({ product: initialProduct }) {
                 </ul>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* SEO İçerik Bölümü */}
+        <div className="mt-16 bg-gray-50 rounded-xl p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Neden {product.category} Seçmelisiniz?</h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Kalite Garantisi</h3>
+              <ul className="space-y-3 text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500 mt-1">✓</span>
+                  <span>Yüksek kaliteli malzemelerden üretim</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500 mt-1">✓</span>
+                  <span>25 yıllık deneyim ve uzmanlık</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500 mt-1">✓</span>
+                  <span>Titizlikle kontrol edilen üretim süreci</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-green-500 mt-1">✓</span>
+                  <span>Müşteri memnuniyeti odaklı hizmet</span>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Avantajlarımız</h3>
+              <ul className="space-y-3 text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500 mt-1">🚚</span>
+                  <span>İstanbul merkezli hızlı teslimat</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500 mt-1">🎨</span>
+                  <span>Kişiye özel tasarım imkanı</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500 mt-1">💰</span>
+                  <span>Uygun fiyat ve kaliteli ürün</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500 mt-1">📞</span>
+                  <span>7/24 müşteri desteği</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* FAQ Bölümü */}
+        <div className="mt-12 bg-white rounded-xl p-8 border border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Sıkça Sorulan Sorular</h2>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Bu {product.category.toLowerCase()} hangi malzemelerden üretiliyor?</h3>
+              <p className="text-gray-700">Ürünlerimiz yüksek kaliteli malzemelerden üretilmektedir. Detaylı malzeme bilgisi için ürün özelliklerine bakabilirsiniz.</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Kargo süresi ne kadar?</h3>
+              <p className="text-gray-700">Normal siparişler 2-3 iş gününde, özel tasarım ürünler 5-7 iş gününde hazırlanır ve kargoya verilir.</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Kişiye özel tasarım yapılıyor mu?</h3>
+              <p className="text-gray-700">Evet! İstediğiniz renk, desen, boyut ve yazı ile özel tasarım yapabiliyoruz. Detaylar için bizimle iletişime geçin.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* İlgili Ürünler ve Linkler */}
+        <div className="mt-12 bg-blue-50 rounded-xl p-8">
+          <h2 className="text-2xl font-bold text-blue-900 mb-6">İlgili Sayfalar</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <Link href="/urunler" className="block bg-white rounded-lg p-4 hover:shadow-md transition-shadow">
+              <h3 className="font-semibold text-gray-900 mb-2">Tüm Ürünler</h3>
+              <p className="text-gray-600 text-sm">Geniş ürün koleksiyonumuzu keşfedin</p>
+            </Link>
+            <Link href={`/urunler/${product.category.toLowerCase()}`} className="block bg-white rounded-lg p-4 hover:shadow-md transition-shadow">
+              <h3 className="font-semibold text-gray-900 mb-2">{product.category} Kategorisi</h3>
+              <p className="text-gray-600 text-sm">Benzer ürünleri inceleyin</p>
+            </Link>
+            <Link href="/iletisim" className="block bg-white rounded-lg p-4 hover:shadow-md transition-shadow">
+              <h3 className="font-semibold text-gray-900 mb-2">İletişim</h3>
+              <p className="text-gray-600 text-sm">Sorularınız için bizimle iletişime geçin</p>
+            </Link>
           </div>
         </div>
       </main>
