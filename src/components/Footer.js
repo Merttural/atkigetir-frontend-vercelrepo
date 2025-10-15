@@ -34,14 +34,17 @@ export default function Footer() {
           <Link href="/urunler" className="hover:underline hover:text-yellow-600 transition-colors">
             Ürünler
           </Link>
+          <Link href="/blog" className="hover:underline hover:text-yellow-600 transition-colors">
+            Blog
+          </Link>
+          <Link href="/sss" className="hover:underline hover:text-yellow-600 transition-colors">
+            SSS
+          </Link>
           <Link href="/hakkimizda" className="hover:underline hover:text-yellow-600 transition-colors">
             Hakkımızda
           </Link>
           <Link href="/iletisim" className="hover:underline hover:text-yellow-600 transition-colors">
             İletişim
-          </Link>
-          <Link href="/iletisim#konumumuz" className="hover:underline hover:text-yellow-600 transition-colors">
-            Konum
           </Link>
         </div>
 

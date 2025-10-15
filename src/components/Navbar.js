@@ -20,6 +20,8 @@ const navLinks = [
       { name: "Bayrak", href: "/urunler/bayrak" }
     ]
   },
+  { name: "Blog", href: "/blog" },
+  { name: "SSS", href: "/sss" },
   { name: "Hakkımızda", href: "/hakkimizda" },
   { name: "İletişim", href: "/iletisim" },
 ];
