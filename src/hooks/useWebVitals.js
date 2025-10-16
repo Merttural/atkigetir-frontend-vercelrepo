@@ -23,13 +23,14 @@ export const useWebVitals = () => {
     // Web Vitals library'sini dinamik olarak yükle
     const loadWebVitals = async () => {
       try {
-        const { getCLS, getFID, getFCP, getLCP, getTTFB } = await import('web-vitals');
+        const webVitals = await import('web-vitals');
         
-        getCLS(sendWebVitals);
-        getFID(sendWebVitals);
-        getFCP(sendWebVitals);
-        getLCP(sendWebVitals);
-        getTTFB(sendWebVitals);
+        // Destructuring ile güvenli import
+        if (webVitals.getCLS) webVitals.getCLS(sendWebVitals);
+        if (webVitals.getFID) webVitals.getFID(sendWebVitals);
+        if (webVitals.getFCP) webVitals.getFCP(sendWebVitals);
+        if (webVitals.getLCP) webVitals.getLCP(sendWebVitals);
+        if (webVitals.getTTFB) webVitals.getTTFB(sendWebVitals);
       } catch (error) {
         console.error('Web Vitals yüklenemedi:', error);
       }
