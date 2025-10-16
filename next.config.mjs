@@ -39,8 +39,7 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     // Performance optimizations
-    loader: 'default',
-    quality: 85
+    loader: 'default'
   },
   compress: true,
   poweredByHeader: false,
