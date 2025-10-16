@@ -8,12 +8,17 @@ export default async function handler(req, res) {
 
   try {
     // Backend API URL'si
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const backendUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://atkigetir-backend.onrender.com' 
+      : 'http://localhost:5000';
     
     // Tüm ürünleri al (backend limit 100)
+    console.log('Backend URL:', backendUrl);
     const response = await fetch(`${backendUrl}/api/products?limit=100`);
+    console.log('Response status:', response.status);
     
     if (!response.ok) {
+      console.log('Backend response not ok, using mock data');
       // Backend çalışmıyorsa mock data döndür
       const mockProducts = [
         {
