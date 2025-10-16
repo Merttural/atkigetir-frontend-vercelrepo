@@ -6,11 +6,13 @@ import { useCart } from "@/hooks/useCart";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import SEO from "@/components/SEO";
 import { trackViewItem, trackAddToCart } from "@/utils/googleAds";
+import { API_BASE_URL } from "@/config/api";
 
 // Static generation için gerekli fonksiyonlar
 export async function getStaticPaths() {
   try {
-    const res = await fetch('https://atkigetir-backend.onrender.com/api/products');
+    const backendUrl = process.env.NODE_ENV === 'production' ? 'https://atkigetir-backend.onrender.com' : 'http://localhost:5000';
+    const res = await fetch(`${backendUrl}/api/products`);
     const data = await res.json();
     
     const paths = data.products?.map(product => ({
@@ -31,7 +33,8 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }) {
   try {
-    const res = await fetch(`https://atkigetir-backend.onrender.com/api/products?slug=${params.slug}`);
+    const backendUrl = process.env.NODE_ENV === 'production' ? 'https://atkigetir-backend.onrender.com' : 'http://localhost:5000';
+    const res = await fetch(`${backendUrl}/api/products?slug=${params.slug}`);
     const data = await res.json();
     
     if (data.products && data.products.length > 0) {
@@ -44,7 +47,7 @@ export async function getStaticProps({ params }) {
     }
     
     // Slug ile bulunamazsa tüm ürünlerde ara
-    const allRes = await fetch('https://atkigetir-backend.onrender.com/api/products');
+    const allRes = await fetch(`${backendUrl}/api/products`);
     const allData = await allRes.json();
     const product = allData.products?.find(p => p.slug === params.slug || p._id === params.slug);
     
@@ -92,14 +95,14 @@ export default function ProductDetail({ product: initialProduct }) {
     if (!slug) return;
     setLoading(true);
     setError("");
-    fetch(`https://atkigetir-backend.onrender.com/api/products?slug=${slug}`)
+    fetch(`${API_BASE_URL}/api/products?slug=${slug}`)
       .then(res => res.json())
       .then(data => {
         if (data.products && data.products.length > 0) {
           setProduct(data.products[0]);
         } else {
           // Slug ile bulunamazsa, tüm ürünleri çekip _id veya slug ile eşleşeni bul
-          fetch('https://atkigetir-backend.onrender.com/api/products')
+          fetch(`${API_BASE_URL}/api/products`)
             .then(res => res.json())
             .then(allData => {
               if (allData.products && allData.products.length > 0) {

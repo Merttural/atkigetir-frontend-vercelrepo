@@ -1,5 +1,6 @@
 // API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
+  (process.env.NODE_ENV === 'production' ? 'https://atkigetir-backend.onrender.com' : 'http://localhost:5000');
 
 // API timeout configuration
 const API_TIMEOUT = 30000; // 30 seconds
