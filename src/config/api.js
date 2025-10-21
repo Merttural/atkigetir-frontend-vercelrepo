@@ -1,4 +1,4 @@
-import { rateLimitFetch, retryWithBackoff } from '../utils/requestQueue';
+// import { rateLimitFetch, retryWithBackoff } from '../utils/requestQueue';
 
 // API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
@@ -30,12 +30,10 @@ export const apiFetch = async (endpoint, options = {}) => {
     const cleanUrl = `${API_BASE_URL}${endpoint}`.replace(/\/+/g, '/');
     console.log('🔗 API Request:', cleanUrl);
     
-    const response = await retryWithBackoff(async () => {
-      return await rateLimitFetch(cleanUrl, {
-        ...options,
-        signal: controller.signal,
-        headers,
-      });
+    const response = await fetch(cleanUrl, {
+      ...options,
+      signal: controller.signal,
+      headers,
     });
 
     clearTimeout(timeoutId);

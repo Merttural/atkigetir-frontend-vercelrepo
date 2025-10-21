@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
 import LoadingSpinner from "./LoadingSpinner";
+import { fallbackApiCall } from "../utils/apiTest";
 
 export default function FeaturedProducts() {
   const [products, setProducts] = useState([]);
@@ -13,25 +14,24 @@ export default function FeaturedProducts() {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://atkigetir-backend.onrender.com'}/api/products?featured=true`);
+        console.log('🔍 Fetching featured products...');
         
-        if (!response.ok) {
-          throw new Error('Ürünler yüklenirken hata oluştu');
-        }
+        // Önce featured ürünleri dene
+        let result = await fallbackApiCall('/api/products?featured=true');
         
-        const data = await response.json();
-        
-        if (data.products && data.products.length > 0) {
-          // En fazla 8 ürün göster
-          setProducts(data.products.slice(0, 8));
+        if (result.success && result.data.products && result.data.products.length > 0) {
+          console.log('✅ Featured products found:', result.data.products.length);
+          setProducts(result.data.products.slice(0, 8));
         } else {
-          // Eğer featured ürün yoksa, tüm ürünlerden ilk 8'ini al
-          const allProductsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://atkigetir-backend.onrender.com'}/api/products`);
-          const allProductsData = await allProductsResponse.json();
+          console.log('⚠️ No featured products, trying all products...');
+          // Featured yoksa tüm ürünleri dene
+          result = await fallbackApiCall('/api/products');
           
-          if (allProductsData.products && allProductsData.products.length > 0) {
-            setProducts(allProductsData.products.slice(0, 8));
+          if (result.success && result.data.products && result.data.products.length > 0) {
+            console.log('✅ All products found:', result.data.products.length);
+            setProducts(result.data.products.slice(0, 8));
           } else {
+            console.log('❌ No products found');
             setProducts([]);
           }
         }

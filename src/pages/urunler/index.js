@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useState, useEffect } from "react";
 import ProductCard from '@/components/ProductCard';
+import { fallbackApiCall } from '../../utils/apiTest';
 
 export default function UrunlerPage() {
   const [products, setProducts] = useState([]);
@@ -10,13 +11,30 @@ export default function UrunlerPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setLoading(true);
-    setError("");
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://atkigetir-backend.onrender.com'}/api/products`)
-      .then(res => res.json())
-      .then(data => setProducts(data.products || []))
-      .catch(() => setError("Ürünler yüklenemedi."))
-      .finally(() => setLoading(false));
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        console.log('🔍 Fetching all products...');
+        
+        const result = await fallbackApiCall('/api/products');
+        
+        if (result.success && result.data.products) {
+          console.log('✅ Products loaded:', result.data.products.length);
+          setProducts(result.data.products);
+        } else {
+          console.log('❌ Failed to load products');
+          setError("Ürünler yüklenemedi.");
+        }
+      } catch (error) {
+        console.error('❌ Products fetch error:', error);
+        setError("Ürünler yüklenemedi.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   const categories = ["Tümü", ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))];
