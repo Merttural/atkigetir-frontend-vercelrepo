@@ -93,9 +93,9 @@ export const cachedApiCall = async (endpoint, fallbackData = null) => {
     return { success: true, data: cachedData, fromCache: true };
   }
 
-  // Cache'de yoksa API'yi retry ile dene
-  const maxRetries = 5;
-  const retryDelay = 2000; // 2 saniye
+  // Cache'de yoksa API'yi retry ile dene - ÇOK AGRESİF
+  const maxRetries = 20; // 10'dan 20'ye çıkarıldı
+  const retryDelay = 500; // 1 saniyeden 0.5 saniyeye düşürüldü
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
