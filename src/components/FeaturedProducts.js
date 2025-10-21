@@ -31,7 +31,8 @@ export default function FeaturedProducts() {
             console.log(`✅ All products found: ${result.data.products.length} (${result.fromCache ? 'from cache' : 'from API'})`);
             setProducts(result.data.products.slice(0, 8));
           } else {
-            console.log('❌ No products found, using mock data');
+            console.log('❌ No products found');
+            setError('Ürünler yüklenemedi. Backend bağlantısı kurulamadı.');
             setProducts([]);
           }
         }

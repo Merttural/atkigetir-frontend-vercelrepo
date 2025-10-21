@@ -24,7 +24,7 @@ export default function UrunlerPage() {
           setProducts(result.data.products);
         } else {
           console.log('❌ Failed to load products');
-          setError("Ürünler yüklenemedi.");
+          setError("Ürünler yüklenemedi. Backend bağlantısı kurulamadı.");
         }
       } catch (error) {
         console.error('❌ Products fetch error:', error);

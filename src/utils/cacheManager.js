@@ -83,7 +83,7 @@ class CacheManager {
 // Global cache instance
 export const cacheManager = new CacheManager();
 
-// Cache ile API çağrısı
+// Cache ile API çağrısı - Retry mekanizması ile
 export const cachedApiCall = async (endpoint, fallbackData = null) => {
   const cacheKey = `api-${endpoint}`;
   
@@ -93,51 +93,67 @@ export const cachedApiCall = async (endpoint, fallbackData = null) => {
     return { success: true, data: cachedData, fromCache: true };
   }
 
-  // Cache'de yoksa API'yi dene
-  try {
-    const baseUrls = [
-      'https://atkigetir-backend.onrender.com',
-      'https://api.atkigetir.com',
-      process.env.NEXT_PUBLIC_API_URL
-    ].filter(Boolean);
+  // Cache'de yoksa API'yi retry ile dene
+  const maxRetries = 5;
+  const retryDelay = 2000; // 2 saniye
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🔍 Attempt ${attempt}/${maxRetries} - Trying backend...`);
+      
+      const baseUrls = [
+        'https://atkigetir-backend.onrender.com',
+        'https://api.atkigetir.com',
+        process.env.NEXT_PUBLIC_API_URL
+      ].filter(Boolean);
 
-    for (const baseUrl of baseUrls) {
-      try {
-        console.log(`🔍 Trying ${baseUrl}${endpoint}`);
-        const response = await fetch(`${baseUrl}${endpoint}`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log(`✅ API success: ${baseUrl}`);
+      for (const baseUrl of baseUrls) {
+        try {
+          console.log(`🔍 Trying ${baseUrl}${endpoint}`);
+          const response = await fetch(`${baseUrl}${endpoint}`);
           
-          // Başarılı response'u cache'e kaydet
-          cacheManager.set(cacheKey, data);
-          
-          return { success: true, data, fromCache: false, url: baseUrl };
-        } else if (response.status === 429) {
-          console.log(`⚠️ Rate limit on ${baseUrl}, trying next...`);
-          continue;
-        } else {
-          console.log(`❌ Error ${response.status} on ${baseUrl}`);
+          if (response.ok) {
+            const data = await response.json();
+            console.log(`✅ API success: ${baseUrl}`);
+            
+            // Başarılı response'u cache'e kaydet
+            cacheManager.set(cacheKey, data);
+            
+            return { success: true, data, fromCache: false, url: baseUrl };
+          } else if (response.status === 429) {
+            console.log(`⚠️ Rate limit on ${baseUrl} (attempt ${attempt})`);
+            // Rate limit varsa biraz bekle ve tekrar dene
+            if (attempt < maxRetries) {
+              console.log(`⏳ Waiting ${retryDelay}ms before retry...`);
+              await new Promise(resolve => setTimeout(resolve, retryDelay));
+              continue;
+            }
+          } else {
+            console.log(`❌ Error ${response.status} on ${baseUrl}`);
+            continue;
+          }
+        } catch (error) {
+          console.log(`❌ Network error on ${baseUrl}:`, error.message);
           continue;
         }
-      } catch (error) {
-        console.log(`❌ Network error on ${baseUrl}:`, error.message);
-        continue;
+      }
+      
+      // Bu attempt'te başarısız, bir sonraki attempt için bekle
+      if (attempt < maxRetries) {
+        console.log(`⏳ Waiting ${retryDelay}ms before next attempt...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      }
+      
+    } catch (error) {
+      console.error(`❌ Attempt ${attempt} failed:`, error);
+      if (attempt < maxRetries) {
+        console.log(`⏳ Waiting ${retryDelay}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
       }
     }
-
-    // Tüm API'ler başarısız, fallback data kullan
-    console.log('⚠️ All APIs failed, using fallback data');
-    const fallback = fallbackData || cacheManager.getMockData('products');
-    
-    // Fallback data'yı da cache'e kaydet (kısa süre)
-    cacheManager.set(cacheKey, fallback, 5 * 60 * 1000); // 5 dakika
-    
-    return { success: true, data: fallback, fromCache: false, fallback: true };
-    
-  } catch (error) {
-    console.error('❌ Cached API call failed:', error);
-    return { success: false, error: error.message };
   }
+
+  // Tüm retry'lar başarısız
+  console.log('❌ All retry attempts failed - Backend is not responding');
+  return { success: false, error: 'Backend is not responding after multiple attempts' };
 };
