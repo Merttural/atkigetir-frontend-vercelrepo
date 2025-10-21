@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { withAdminAuth } from '@/components/withAuth';
+import { uploadMultipleImages } from '../../utils/uploadFallback';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 function AdminProducts() {
@@ -152,52 +153,17 @@ function AdminProducts() {
     }
   };
 
-  // Çoklu resim yükleme
+  // Çoklu resim yükleme - Fallback sistemi ile
   const uploadImages = async (files) => {
-    const uploadPromises = files.map(async (file) => {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (!response.ok) {
-        let errorData;
-        try {
-          const contentType = response.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            errorData = await response.json();
-          } else {
-            const textResponse = await response.text();
-            console.log('Upload error response:', textResponse);
-            throw new Error(`HTTP ${response.status}: Resim yükleme hatası`);
-          }
-        } catch (jsonError) {
-          console.error('Upload JSON parsing error:', jsonError);
-          throw new Error(`HTTP ${response.status}: Resim yükleme hatası - ${jsonError.message}`);
-        }
-        throw new Error(errorData.error || 'Resim yüklenemedi');
-      }
-
-      let data;
-      try {
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-          data = await response.json();
-        } else {
-          throw new Error('Geçersiz response formatı');
-        }
-      } catch (jsonError) {
-        console.error('Upload success JSON parsing error:', jsonError);
-        throw new Error('Resim yükleme başarısız - geçersiz response');
-      }
-      
-      return data.imageUrl;
-    });
-
-    return Promise.all(uploadPromises);
+    try {
+      console.log('🖼️ Starting image upload with fallback system...');
+      const imageUrls = await uploadMultipleImages(files);
+      console.log('✅ All images uploaded successfully:', imageUrls);
+      return imageUrls;
+    } catch (error) {
+      console.error('❌ Image upload failed:', error);
+      throw new Error(`Resim yükleme hatası: ${error.message}`);
+    }
   };
 
   const handleSubmit = async (e) => {

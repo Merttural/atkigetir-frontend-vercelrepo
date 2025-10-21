@@ -1,5 +1,6 @@
 // ProductForm.js - Sadeleştirilmiş ürün ekleme formu
 import { useState, useEffect } from 'react';
+import { uploadImageWithFallback } from '../utils/uploadFallback';
 
 export default function ProductForm({ onProductAdded }) {
   const [formData, setFormData] = useState({
@@ -50,22 +51,17 @@ export default function ProductForm({ onProductAdded }) {
     }
   };
 
-  // Resim yükleme
+  // Resim yükleme - Fallback sistemi ile
   const uploadImage = async (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!response.ok) {
-      throw new Error('Resim yüklenemedi');
+    try {
+      console.log('🖼️ Uploading image with fallback system...');
+      const imageUrl = await uploadImageWithFallback(file);
+      console.log('✅ Image uploaded successfully:', imageUrl);
+      return imageUrl;
+    } catch (error) {
+      console.error('❌ Image upload failed:', error);
+      throw new Error(`Resim yükleme hatası: ${error.message}`);
     }
-
-    const data = await response.json();
-    return data.imageUrl;
   };
 
   // Form gönderimi
