@@ -309,15 +309,15 @@ const securityMiddleware = [
   // Input sanitization
   sanitizeInput,
   
-  // Rate limiting - Production için artırıldı
-  createRateLimit(15 * 60 * 1000, process.env.NODE_ENV === 'production' ? 1000 : 100), // 15 dakikada 1000 istek (production)
+  // Rate limiting - ÇOK YÜKSEK LİMİT (Site düzeltme aşamasında)
+  createRateLimit(15 * 60 * 1000, process.env.NODE_ENV === 'production' ? 100000 : 50000), // 15 dakikada 100,000 istek (production)
 ];
 
-// API rate limiting - Production için optimize edildi
-const apiRateLimit = createRateLimit(15 * 60 * 1000, process.env.NODE_ENV === 'production' ? 5000 : 2000); // 15 dakikada 5000 istek (production)
+// API rate limiting - ÇOK YÜKSEK LİMİT (Site düzeltme aşamasında)
+const apiRateLimit = createRateLimit(15 * 60 * 1000, process.env.NODE_ENV === 'production' ? 500000 : 100000); // 15 dakikada 500,000 istek (production)
 
-// Auth rate limiting - Production için optimize edildi
-const authRateLimit = createRateLimit(15 * 60 * 1000, process.env.NODE_ENV === 'production' ? 10000 : 5000); // 15 dakikada 10000 istek (production)
+// Auth rate limiting - ÇOK YÜKSEK LİMİT (Site düzeltme aşamasında)
+const authRateLimit = createRateLimit(15 * 60 * 1000, process.env.NODE_ENV === 'production' ? 1000000 : 200000); // 15 dakikada 1,000,000 istek (production)
 
 module.exports = {
   securityMiddleware,
