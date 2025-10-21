@@ -66,11 +66,35 @@ export default function LoginModal({ open, onClose, onRegister, onForgot }) {
       });
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        let errorData = {};
+        try {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            errorData = await response.json();
+          } else {
+            const textResponse = await response.text();
+            console.log('Login error response (non-JSON):', textResponse);
+          }
+        } catch (jsonError) {
+          console.error('Login error JSON parsing error:', jsonError);
+        }
         throw new Error(errorData.message || `HTTP ${response.status}: Giriş başarısız`);
       }
       
-      const data = await response.json();
+      let data;
+      try {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          const textResponse = await response.text();
+          console.log('Login success response (non-JSON):', textResponse);
+          throw new Error('Geçersiz response formatı');
+        }
+      } catch (jsonError) {
+        console.error('Login success JSON parsing error:', jsonError);
+        throw new Error('Giriş yanıtı işlenemedi - geçersiz format');
+      }
       
       // Backend'den gelen response'u kontrol et
       if (data.error) {
@@ -135,11 +159,35 @@ export default function LoginModal({ open, onClose, onRegister, onForgot }) {
       });
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        let errorData = {};
+        try {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            errorData = await response.json();
+          } else {
+            const textResponse = await response.text();
+            console.log('Forgot password error response (non-JSON):', textResponse);
+          }
+        } catch (jsonError) {
+          console.error('Forgot password error JSON parsing error:', jsonError);
+        }
         throw new Error(errorData.message || `HTTP ${response.status}: Email gönderilemedi`);
       }
       
-      const data = await response.json();
+      let data;
+      try {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          const textResponse = await response.text();
+          console.log('Forgot password success response (non-JSON):', textResponse);
+          throw new Error('Geçersiz response formatı');
+        }
+      } catch (jsonError) {
+        console.error('Forgot password success JSON parsing error:', jsonError);
+        throw new Error('Email yanıtı işlenemedi - geçersiz format');
+      }
       setSuccess(data.message || "Şifre sıfırlama linki email adresinize gönderildi!");
       setTimeout(() => {
         onClose();

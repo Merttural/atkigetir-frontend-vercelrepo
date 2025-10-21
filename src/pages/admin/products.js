@@ -77,9 +77,36 @@ function AdminProducts() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       const res = await fetch(`${apiUrl}/api/products?sort=orderRank`);
       if (!res.ok) {
-        throw new Error('API yanıtı başarısız');
+        let errorData;
+        try {
+          const contentType = res.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            errorData = await res.json();
+          } else {
+            const textResponse = await res.text();
+            console.log('Products fetch error response:', textResponse);
+            throw new Error(`HTTP ${res.status}: Backend'den geçersiz response`);
+          }
+        } catch (jsonError) {
+          console.error('Products fetch JSON parsing error:', jsonError);
+          throw new Error(`HTTP ${res.status}: API yanıtı başarısız - ${jsonError.message}`);
+        }
+        throw new Error(errorData.error || errorData.message || 'API yanıtı başarısız');
       }
-      const data = await res.json();
+      
+      let data;
+      try {
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          data = await res.json();
+        } else {
+          throw new Error('Geçersiz response formatı');
+        }
+      } catch (jsonError) {
+        console.error('Products fetch success JSON parsing error:', jsonError);
+        throw new Error('Ürünler yüklenemedi - geçersiz response formatı');
+      }
+      
       setProducts(data.products || []);
     } catch (e) {
       setError('Ürünler yüklenemedi: ' + e.message);
@@ -137,11 +164,36 @@ function AdminProducts() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData;
+        try {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            errorData = await response.json();
+          } else {
+            const textResponse = await response.text();
+            console.log('Upload error response:', textResponse);
+            throw new Error(`HTTP ${response.status}: Resim yükleme hatası`);
+          }
+        } catch (jsonError) {
+          console.error('Upload JSON parsing error:', jsonError);
+          throw new Error(`HTTP ${response.status}: Resim yükleme hatası - ${jsonError.message}`);
+        }
         throw new Error(errorData.error || 'Resim yüklenemedi');
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          throw new Error('Geçersiz response formatı');
+        }
+      } catch (jsonError) {
+        console.error('Upload success JSON parsing error:', jsonError);
+        throw new Error('Resim yükleme başarısız - geçersiz response');
+      }
+      
       return data.imageUrl;
     });
 
@@ -190,13 +242,40 @@ function AdminProducts() {
       if (!res.ok) {
         let errorData;
         try {
-          errorData = await res.json();
+          // Response'un content-type'ını kontrol et
+          const contentType = res.headers.get('content-type');
+          console.log('Response Content-Type:', contentType);
+          
+          if (contentType && contentType.includes('application/json')) {
+            errorData = await res.json();
+          } else {
+            // JSON değilse text olarak oku
+            const textResponse = await res.text();
+            console.log('Non-JSON response:', textResponse);
+            throw new Error(`HTTP ${res.status}: Backend'den geçersiz response formatı`);
+          }
         } catch (jsonError) {
           console.error('JSON parsing error:', jsonError);
-          throw new Error(`HTTP ${res.status}: Backend'den geçersiz response`);
+          console.log('Response status:', res.status);
+          console.log('Response headers:', Object.fromEntries(res.headers.entries()));
+          throw new Error(`HTTP ${res.status}: Backend'den geçersiz response - ${jsonError.message}`);
         }
         console.error('Backend error:', errorData);
         throw new Error(errorData.error || errorData.message || 'İşlem başarısız');
+      }
+
+      // Başarılı response'u kontrol et
+      let successData;
+      try {
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          successData = await res.json();
+        } else {
+          console.log('Non-JSON success response, assuming success');
+        }
+      } catch (jsonError) {
+        console.error('Success response JSON parsing error:', jsonError);
+        // JSON parsing hatası olsa bile işlem başarılı olabilir
       }
 
       // Form'u temizle ve listeyi yenile

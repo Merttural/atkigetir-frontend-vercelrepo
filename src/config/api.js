@@ -52,7 +52,20 @@ export const apiFetch = async (endpoint, options = {}) => {
           });
 
           if (refreshResponse.ok) {
-            const refreshData = await refreshResponse.json();
+            let refreshData;
+            try {
+              const contentType = refreshResponse.headers.get('content-type');
+              if (contentType && contentType.includes('application/json')) {
+                refreshData = await refreshResponse.json();
+              } else {
+                const textResponse = await refreshResponse.text();
+                console.log('Refresh response (non-JSON):', textResponse);
+                throw new Error('Geçersiz refresh response formatı');
+              }
+            } catch (jsonError) {
+              console.error('Refresh JSON parsing error:', jsonError);
+              throw new Error('Token yenileme başarısız - geçersiz response');
+            }
             
             // Store new tokens
             if (refreshData.token) {
@@ -79,11 +92,37 @@ export const apiFetch = async (endpoint, options = {}) => {
             });
 
             if (!retryResponse.ok) {
-              const errorData = await retryResponse.json().catch(() => ({}));
+              let errorData = {};
+              try {
+                const contentType = retryResponse.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                  errorData = await retryResponse.json();
+                } else {
+                  const textResponse = await retryResponse.text();
+                  console.log('Retry error response (non-JSON):', textResponse);
+                }
+              } catch (jsonError) {
+                console.error('Retry error JSON parsing error:', jsonError);
+              }
               throw new Error(errorData.message || `HTTP error! status: ${retryResponse.status}`);
             }
 
-            return await retryResponse.json();
+            let retryData;
+            try {
+              const contentType = retryResponse.headers.get('content-type');
+              if (contentType && contentType.includes('application/json')) {
+                retryData = await retryResponse.json();
+              } else {
+                const textResponse = await retryResponse.text();
+                console.log('Retry success response (non-JSON):', textResponse);
+                throw new Error('Geçersiz retry response formatı');
+              }
+            } catch (jsonError) {
+              console.error('Retry success JSON parsing error:', jsonError);
+              throw new Error('Retry yanıtı işlenemedi - geçersiz format');
+            }
+
+            return retryData;
           } else {
             // Refresh failed, logout user
             localStorage.removeItem('token');
@@ -114,11 +153,39 @@ export const apiFetch = async (endpoint, options = {}) => {
     }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      let errorData = {};
+      try {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          errorData = await response.json();
+        } else {
+          const textResponse = await response.text();
+          console.log('API error response (non-JSON):', textResponse);
+        }
+      } catch (jsonError) {
+        console.error('API error JSON parsing error:', jsonError);
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      }
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    let successData;
+    try {
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        successData = await response.json();
+      } else {
+        const textResponse = await response.text();
+        console.log('API success response (non-JSON):', textResponse);
+        throw new Error('Geçersiz response formatı');
+      }
+    } catch (jsonError) {
+      console.error('API success JSON parsing error:', jsonError);
+      throw new Error('API yanıtı işlenemedi - geçersiz format');
+    }
+    
+    return successData;
   } catch (error) {
     clearTimeout(timeoutId);
     if (error.name === 'AbortError') {

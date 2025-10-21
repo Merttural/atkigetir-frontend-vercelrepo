@@ -18,6 +18,16 @@ const nextConfig = {
         port: '5000',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'atkigetir-backend.onrender.com',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.atkigetir.com',
+        pathname: '/uploads/**',
+      },
     ],
   },
   

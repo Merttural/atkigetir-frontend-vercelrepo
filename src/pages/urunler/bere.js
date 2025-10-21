@@ -11,7 +11,7 @@ export default function BerePage() {
   useEffect(() => {
     setLoading(true);
     setError("");
-    fetch('http://localhost:5000/api/products')
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://atkigetir-backend.onrender.com'}/api/products`)
       .then(res => res.json())
       .then(data => {
         // Sadece Bere kategorisindeki ürünleri filtrele

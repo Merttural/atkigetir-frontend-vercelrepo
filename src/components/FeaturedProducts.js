@@ -13,7 +13,7 @@ export default function FeaturedProducts() {
         setLoading(true);
         setError(null);
         
-        const response = await fetch('http://localhost:5000/api/products?featured=true');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://atkigetir-backend.onrender.com'}/api/products?featured=true`);
         
         if (!response.ok) {
           throw new Error('Ürünler yüklenirken hata oluştu');
@@ -26,7 +26,7 @@ export default function FeaturedProducts() {
           setProducts(data.products.slice(0, 8));
         } else {
           // Eğer featured ürün yoksa, tüm ürünlerden ilk 8'ini al
-          const allProductsResponse = await fetch('http://localhost:5000/api/products');
+          const allProductsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://atkigetir-backend.onrender.com'}/api/products`);
           const allProductsData = await allProductsResponse.json();
           
           if (allProductsData.products && allProductsData.products.length > 0) {

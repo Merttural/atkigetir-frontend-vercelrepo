@@ -12,6 +12,7 @@ export default function Document() {
         <meta name="theme-color" content="#3b82f6" />
         
         {/* PWA Meta Tags */}
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Atkigetir" />
@@ -36,6 +37,9 @@ export default function Document() {
         <link rel="icon" href="/images/logo.svg" sizes="any" />
         <link rel="apple-touch-icon" href="/images/logo.svg" />
         <link rel="manifest" href="/manifest.json" />
+        
+        {/* Preload critical resources */}
+        <link rel="preload" href="/images/logo.svg" as="image" type="image/svg+xml" />
         
         {/* Google Ads Tag */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11457126126"></script>
