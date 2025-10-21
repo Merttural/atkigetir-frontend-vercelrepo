@@ -59,6 +59,21 @@ const nextConfig = {
   experimental: {
     esmExternals: true,
   },
+  
+  // Production optimizations
+  ...(process.env.NODE_ENV === 'production' && {
+    // Production'da daha agresif caching
+    generateEtags: true,
+    poweredByHeader: false,
+    
+    // API route optimizations
+    api: {
+      bodyParser: {
+        sizeLimit: '10mb',
+      },
+      responseLimit: '10mb',
+    },
+  }),
 };
 
 export default nextConfig;

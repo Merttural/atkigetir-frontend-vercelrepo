@@ -1,9 +1,11 @@
+import { rateLimitFetch, retryWithBackoff } from '../utils/requestQueue';
+
 // API Configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
   (process.env.NODE_ENV === 'production' ? 'https://atkigetir-backend.onrender.com' : 'http://localhost:5000');
 
-// API timeout configuration
-const API_TIMEOUT = 30000; // 30 seconds
+// API timeout configuration - Production için artırıldı
+const API_TIMEOUT = process.env.NODE_ENV === 'production' ? 60000 : 30000; // Production: 60 saniye, Development: 30 saniye
 
 // Enhanced API fetch function with timeout, error handling, and token refresh
 export const apiFetch = async (endpoint, options = {}) => {
@@ -28,10 +30,12 @@ export const apiFetch = async (endpoint, options = {}) => {
     const cleanUrl = `${API_BASE_URL}${endpoint}`.replace(/\/+/g, '/');
     console.log('🔗 API Request:', cleanUrl);
     
-    const response = await fetch(cleanUrl, {
-      ...options,
-      signal: controller.signal,
-      headers,
+    const response = await retryWithBackoff(async () => {
+      return await rateLimitFetch(cleanUrl, {
+        ...options,
+        signal: controller.signal,
+        headers,
+      });
     });
 
     clearTimeout(timeoutId);

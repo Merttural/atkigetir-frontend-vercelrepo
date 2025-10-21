@@ -4,7 +4,7 @@
 // Cache için global değişken
 let cachedProducts = null;
 let cacheTimestamp = null;
-const CACHE_DURATION = 2 * 60 * 1000; // 2 dakika
+const CACHE_DURATION = process.env.NODE_ENV === 'production' ? 5 * 60 * 1000 : 2 * 60 * 1000; // Production: 5 dakika, Development: 2 dakika
 let isBackendDown = false;
 
 export default async function handler(req, res) {
