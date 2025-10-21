@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "", remember: false });
+  const [loading, setLoading] = useState(false);
   const modalRef = useRef(null);
   const router = useRouter();
   const [error, setError] = useState("");
@@ -35,27 +36,81 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
+
     try {
-      const res = await fetch("https://atkigetir-backend.onrender.com/api/auth/login", {
+      // Environment-based API URL
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://atkigetir-backend.onrender.com' 
+        : 'http://localhost:5000';
+      
+      console.log("🔐 Login attempt:", { email: form.email, apiUrl });
+      
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, password: form.password })
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          email: form.email,
+          password: form.password
+        })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Giriş başarısız");
+      
+      console.log("📡 Response status:", response.status);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: Giriş başarısız`);
+      }
+      
+      const data = await response.json();
+      console.log("📦 Success data:", data);
+      
+      // Backend'den gelen response'u kontrol et
+      if (data.error) {
+        throw new Error(data.error || "Giriş başarısız");
+      }
       
       // Token ve kullanıcı bilgilerini localStorage'a kaydet
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+      }
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      
+      // Remember me özelliği
+      if (form.remember) {
+        localStorage.setItem('rememberMe', 'true');
+      } else {
+        localStorage.removeItem('rememberMe');
+      }
+      
+      // Başarılı giriş eventi
+      window.dispatchEvent(new Event('user-logged-in'));
       
       // Redirect parametresine göre yönlendir
-      if (data.user.role === "admin") {
-        router.push(redirect.startsWith('/admin') ? redirect : "/admin");
-      } else {
-        router.push(redirect.startsWith('/admin') ? "/" : redirect);
-      }
+      setTimeout(() => {
+        if (data.user && data.user.role === "admin") {
+          router.push(redirect.startsWith('/admin') ? redirect : "/admin");
+        } else {
+          router.push(redirect.startsWith('/admin') ? "/" : redirect);
+        }
+      }, 1000);
+      
     } catch (err) {
-      setError(err.message);
+      console.error("❌ Login error:", err);
+      setError(err.message || "Giriş yapılırken bir hata oluştu");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,6 +125,7 @@ export default function LoginPage() {
         >
           ×
         </button>
+        
         <h1 className="text-2xl font-bold mb-6 text-center">Giriş Yap</h1>
         
         {/* Message göster */}
@@ -91,9 +147,12 @@ export default function LoginPage() {
                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 placeholder-gray-400"
                 value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                required
+                disabled={loading}
               />
             </div>
           </div>
+          
           <div>
             <label htmlFor="password" className="block mb-1 font-medium">Şifre</label>
             <div className="relative">
@@ -105,9 +164,12 @@ export default function LoginPage() {
                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 placeholder-gray-400"
                 value={form.password}
                 onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                required
+                disabled={loading}
               />
             </div>
           </div>
+          
           <div className="flex items-center justify-between text-sm mt-1">
             <label className="flex items-center gap-2 select-none">
               <input
@@ -115,6 +177,7 @@ export default function LoginPage() {
                 checked={form.remember}
                 onChange={e => setForm(f => ({ ...f, remember: e.target.checked }))}
                 className="accent-blue-600"
+                disabled={loading}
               />
               Beni hatırla
             </label>
@@ -122,17 +185,21 @@ export default function LoginPage() {
               Şifremi unuttum
             </Link>
           </div>
+          
           {error && (
             <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
               {error}
             </div>
           )}
+          
           <button
             type="submit"
-            className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            disabled={loading}
+            className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Giriş Yap
+            {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
           </button>
+          
           <div className="text-center text-sm text-gray-600">
             Hesabınız yok mu?{" "}
             <Link href="/register" className="text-blue-600 hover:text-blue-800 font-medium">

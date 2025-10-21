@@ -11,18 +11,24 @@ export const apiFetch = async (endpoint, options = {}) => {
   const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
 
   try {
-    // Add access token to headers if available
-    const accessToken = localStorage.getItem('accessToken');
+    // Get token from localStorage (try both token keys)
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    
     const headers = {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       ...options.headers,
     };
 
-    if (accessToken) {
-      headers['Authorization'] = `Bearer ${accessToken}`;
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    // Clean URL to avoid double slashes
+    const cleanUrl = `${API_BASE_URL}${endpoint}`.replace(/\/+/g, '/');
+    console.log('🔗 API Request:', cleanUrl);
+    
+    const response = await fetch(cleanUrl, {
       ...options,
       signal: controller.signal,
       headers,
@@ -30,29 +36,43 @@ export const apiFetch = async (endpoint, options = {}) => {
 
     clearTimeout(timeoutId);
 
+    // Handle 401 Unauthorized
     if (response.status === 401) {
-      // Token expired, try to refresh
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken && endpoint !== '/api/auth/refresh') {
         try {
-          const refreshResponse = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+          const refreshUrl = `${API_BASE_URL}/api/auth/refresh`.replace(/\/+/g, '/');
+          const refreshResponse = await fetch(refreshUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
             body: JSON.stringify({ refreshToken })
           });
 
           if (refreshResponse.ok) {
             const refreshData = await refreshResponse.json();
-            localStorage.setItem('accessToken', refreshData.data.accessToken);
-            localStorage.setItem('refreshToken', refreshData.data.refreshToken);
+            
+            // Store new tokens
+            if (refreshData.token) {
+              localStorage.setItem('token', refreshData.token);
+            }
+            if (refreshData.accessToken) {
+              localStorage.setItem('accessToken', refreshData.accessToken);
+            }
+            if (refreshData.refreshToken) {
+              localStorage.setItem('refreshToken', refreshData.refreshToken);
+            }
 
             // Retry original request with new token
+            const newToken = refreshData.token || refreshData.accessToken;
             const newHeaders = {
               ...headers,
-              'Authorization': `Bearer ${refreshData.data.accessToken}`
+              'Authorization': `Bearer ${newToken}`
             };
 
-            const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
+            const retryResponse = await fetch(cleanUrl, {
               ...options,
               signal: controller.signal,
               headers: newHeaders,
@@ -66,6 +86,7 @@ export const apiFetch = async (endpoint, options = {}) => {
             return await retryResponse.json();
           } else {
             // Refresh failed, logout user
+            localStorage.removeItem('token');
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
@@ -73,12 +94,22 @@ export const apiFetch = async (endpoint, options = {}) => {
             throw new Error('Session expired. Please login again.');
           }
         } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          localStorage.removeItem('token');
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           localStorage.removeItem('user');
           window.dispatchEvent(new Event('user-logged-out'));
           throw new Error('Session expired. Please login again.');
         }
+      } else {
+        // No refresh token, logout user
+        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        window.dispatchEvent(new Event('user-logged-out'));
+        throw new Error('Session expired. Please login again.');
       }
     }
 
@@ -100,6 +131,10 @@ export const apiFetch = async (endpoint, options = {}) => {
 export const API_ENDPOINTS = {
   // Auth endpoints
   AUTH: `${API_BASE_URL}/api/auth`,
+  AUTH_LOGIN: `${API_BASE_URL}/api/auth/login`,
+  AUTH_REGISTER: `${API_BASE_URL}/api/auth/register`,
+  AUTH_ME: `${API_BASE_URL}/api/auth/me`,
+  AUTH_REFRESH: `${API_BASE_URL}/api/auth/refresh`,
   
   // Product endpoints
   PRODUCTS: `${API_BASE_URL}/api/products`,
@@ -125,4 +160,4 @@ export const API_ENDPOINTS = {
   PAYMENT_CALLBACK: `${API_BASE_URL}/api/payment/callback`,
 };
 
-export default API_ENDPOINTS; 
+export default API_ENDPOINTS;

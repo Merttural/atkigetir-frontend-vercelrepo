@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { apiFetch } from "../config/api";
 
 export default function LoginModal({ open, onClose, onRegister, onForgot }) {
   const modalRef = useRef(null);
@@ -9,6 +8,7 @@ export default function LoginModal({ open, onClose, onRegister, onForgot }) {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -39,36 +39,72 @@ export default function LoginModal({ open, onClose, onRegister, onForgot }) {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setLoading(true);
     
     if (!isValidEmail(form.email)) {
       setError("Lütfen geçerli bir e-posta adresi girin.");
+      setLoading(false);
       return;
     }
     
     try {
-      const data = await apiFetch('/api/auth/login', {
+      // Environment-based API URL
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://atkigetir-backend.onrender.com' 
+        : 'http://localhost:5000';
+      
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
-        body: JSON.stringify({ email: form.email, password: form.password })
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({ 
+          email: form.email, 
+          password: form.password 
+        })
       });
       
-      if (data.data.accessToken) {
-        localStorage.setItem('accessToken', data.data.accessToken);
-        localStorage.setItem('refreshToken', data.data.refreshToken);
-        localStorage.setItem('user', JSON.stringify(data.data.user));
-        window.dispatchEvent(new Event('user-logged-in'));
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: Giriş başarısız`);
       }
+      
+      const data = await response.json();
+      
+      // Backend'den gelen response'u kontrol et
+      if (data.error) {
+        throw new Error(data.error || "Giriş başarısız");
+      }
+      
+      // Store tokens and user data
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+      }
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      
+      // Dispatch login event
+      window.dispatchEvent(new Event('user-logged-in'));
       
       setSuccess("Giriş başarılı! Yönlendiriliyorsunuz...");
       setTimeout(() => {
         onClose();
-        if (data.data.user.role === "admin") {
-          router.push("/admin");
-        } else {
-          router.push("/");
-        }
+        // Sayfayı yenile
+        window.location.reload();
       }, 1000);
     } catch (err) {
+      console.error('Login error:', err);
       setError(err.message || "Giriş işlemi başarısız. Lütfen bilgilerinizi kontrol edin.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,23 +112,43 @@ export default function LoginModal({ open, onClose, onRegister, onForgot }) {
   const handleForgot = async () => {
     setError("");
     setSuccess("");
+    setLoading(true);
+    
     if (!isValidEmail(form.email)) {
       setError("Lütfen geçerli bir e-posta adresi girin.");
+      setLoading(false);
       return;
     }
     
     try {
-      const data = await apiFetch('/api/auth/forgot-password', {
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://atkigetir-backend.onrender.com' 
+        : 'http://localhost:5000';
+      
+      const response = await fetch(`${apiUrl}/api/auth/forgot-password`, {
         method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify({ email: form.email })
       });
       
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: Email gönderilemedi`);
+      }
+      
+      const data = await response.json();
       setSuccess(data.message || "Şifre sıfırlama linki email adresinize gönderildi!");
       setTimeout(() => {
         onClose();
       }, 1500);
     } catch (err) {
+      console.error('Forgot password error:', err);
       setError(err.message || "Email gönderilemedi. Lütfen tekrar deneyin.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,7 +163,9 @@ export default function LoginModal({ open, onClose, onRegister, onForgot }) {
         >
           ×
         </button>
+        
         <h1 className="text-2xl font-bold mb-6 text-center">Giriş Yap</h1>
+        
         <form className="w-full flex flex-col gap-4" onSubmit={handleLogin}>
           <div>
             <label htmlFor="email" className="block mb-1 font-medium text-black">E-posta</label>
@@ -121,9 +179,11 @@ export default function LoginModal({ open, onClose, onRegister, onForgot }) {
                 value={form.email}
                 onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                 required
+                disabled={loading}
               />
             </div>
           </div>
+          
           <div>
             <label htmlFor="password" className="block mb-1 font-medium text-black">Şifre</label>
             <div className="relative">
@@ -136,35 +196,54 @@ export default function LoginModal({ open, onClose, onRegister, onForgot }) {
                 value={form.password}
                 onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
                 required
+                disabled={loading}
               />
             </div>
           </div>
+          
           <div className="flex items-center justify-between text-sm mt-1">
             <label className="flex items-center gap-2 select-none">
               <input
                 type="checkbox"
                 className="accent-blue-600"
+                disabled={loading}
               />
               Beni hatırla
             </label>
-            <button type="button" className="text-blue-600 hover:underline font-medium" onClick={handleForgot}>Şifremi unuttum</button>
+            <button 
+              type="button" 
+              className="text-blue-600 hover:underline font-medium" 
+              onClick={handleForgot}
+              disabled={loading}
+            >
+              Şifremi unuttum
+            </button>
           </div>
+          
           {error && <div className="text-red-600 text-center font-semibold mb-2">{error}</div>}
           {success && <div className="text-green-600 text-center font-semibold mb-2">{success}</div>}
+          
           <button
             type="submit"
-            className="mt-2 w-full px-4 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-500 shadow hover:opacity-90 transition text-lg"
+            disabled={loading}
+            className="mt-2 w-full px-4 py-3 rounded-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-500 shadow hover:opacity-90 transition text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Giriş Yap
+            {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
           </button>
         </form>
+        
         <p className="mt-6 text-sm text-gray-600 text-center">
           Hesabınız yok mu?{' '}
-          <button type="button" className="text-blue-600 hover:underline font-medium" onClick={onRegister}>
+          <button 
+            type="button" 
+            className="text-blue-600 hover:underline font-medium" 
+            onClick={onRegister}
+            disabled={loading}
+          >
             Kayıt Ol
           </button>
         </p>
       </div>
     </div>
   );
-} 
+}

@@ -59,12 +59,14 @@ export default function Hero() {
 
         {/* CTA Butonlar */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href="/contact"
-            className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-full shadow transition-all duration-200 text-base"
+          <a
+            href="https://wa.me/905337498266?text=Merhabalar%20Kerim%20Bey%20Sipariş%20Vermek%20istiyorum."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-full shadow transition-all duration-200 text-base"
           >
-            <span role="img" aria-label="phone" className="mr-2">📞</span> İletişime Geç
-          </Link>
+            <span role="img" aria-label="whatsapp" className="mr-2">💬</span> İletişime Geç
+          </a>
           <a
             href="mailto:info@atkigetir.com"
             className="inline-flex items-center justify-center bg-white/10 hover:bg-white/20 text-white font-semibold px-6 py-3 rounded-full shadow border border-white/20 transition-all duration-200 text-base"

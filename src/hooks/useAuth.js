@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { apiFetch } from '../config/api';
 import { jwtDecode } from 'jwt-decode';
 
 export const useAuth = () => {
@@ -7,15 +6,27 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Get user from token (for Navbar compatibility)
+  // Environment-based API URL
+  const getApiUrl = () => {
+    if (typeof window === 'undefined') return 'http://localhost:5000';
+    return process.env.NODE_ENV === 'production' 
+      ? 'https://atkigetir-backend.onrender.com' 
+      : 'http://localhost:5000';
+  };
+
+  // Get user from token
   const getUserFromToken = () => {
     if (typeof window === 'undefined') return null;
-    const token = localStorage.getItem('accessToken');
+    
+    // Try different token keys
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
     if (!token) return null;
+    
     try {
-      return jwtDecode(token);
+      const decoded = jwtDecode(token);
+      return decoded;
     } catch (err) {
-      console.error('jwtDecode error:', err, 'token:', token);
+      console.error('jwtDecode error:', err);
       return null;
     }
   };
@@ -27,23 +38,152 @@ export const useAuth = () => {
 
   const checkAuth = async () => {
     try {
-      const accessToken = localStorage.getItem('accessToken');
-      if (!accessToken) {
+      setLoading(true);
+      
+      // Check if user exists in localStorage
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        setUser(userData);
         setLoading(false);
         return;
       }
 
-      const data = await apiFetch('/api/auth/me', {
+      // Try to get user from token
+      const tokenUser = getUserFromToken();
+      if (tokenUser) {
+        setUser(tokenUser);
+        setLoading(false);
+        return;
+      }
+
+      // If no stored data, try API call
+      const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/api/auth/me`, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 
-      setUser(data.data.user);
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user || data);
+        localStorage.setItem('user', JSON.stringify(data.user || data));
+      } else {
+        // Token invalid, clear storage
+        logout();
+      }
     } catch (error) {
       console.error('Auth check failed:', error);
-      // Token expired, try refresh
-      await refreshToken();
+      logout();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = async (email, password) => {
+    try {
+      setError(null);
+      setLoading(true);
+      
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: Giriş başarısız`);
+      }
+
+      const data = await response.json();
+      
+      // Backend'den gelen response'u kontrol et
+      if (data.error) {
+        throw new Error(data.error || "Giriş başarısız");
+      }
+
+      // Store tokens and user data
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+      }
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setUser(data.user);
+      }
+      
+      // Dispatch login event
+      window.dispatchEvent(new Event('user-logged-in'));
+      
+      return { success: true, user: data.user };
+    } catch (error) {
+      console.error('Login error:', error);
+      setError(error.message);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = () => {
+    // Clear all auth-related data
+    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    localStorage.removeItem('rememberMe');
+    
+    setUser(null);
+    setError(null);
+    
+    // Dispatch logout event
+    window.dispatchEvent(new Event('user-logged-out'));
+  };
+
+  const register = async (userData) => {
+    try {
+      setError(null);
+      setLoading(true);
+      
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(userData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: Kayıt başarısız`);
+      }
+
+      const data = await response.json();
+      return { success: true, message: data.message || "Kayıt başarılı" };
+    } catch (error) {
+      console.error('Register error:', error);
+      setError(error.message);
+      return { success: false, error: error.message };
     } finally {
       setLoading(false);
     }
@@ -57,63 +197,37 @@ export const useAuth = () => {
         return;
       }
 
-      const data = await apiFetch('/api/auth/refresh', {
+      const apiUrl = getApiUrl();
+      const response = await fetch(`${apiUrl}/api/auth/refresh`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ refreshToken })
       });
 
-      localStorage.setItem('accessToken', data.data.accessToken);
-      localStorage.setItem('refreshToken', data.data.refreshToken);
+      if (!response.ok) {
+        logout();
+        return;
+      }
+
+      const data = await response.json();
       
-      // Re-check auth with new token
-      await checkAuth();
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+      }
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken);
+      }
+      
+      return data;
     } catch (error) {
       console.error('Token refresh failed:', error);
       logout();
-    }
-  };
-
-  const login = async (email, password) => {
-    try {
-      setError(null);
-      const data = await apiFetch('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password })
-      });
-
-      localStorage.setItem('accessToken', data.data.accessToken);
-      localStorage.setItem('refreshToken', data.data.refreshToken);
-      localStorage.setItem('user', JSON.stringify(data.data.user));
-      setUser(data.data.user);
-      
-      window.dispatchEvent(new Event('user-logged-in'));
-      return { success: true, user: data.data.user };
-    } catch (error) {
-      setError(error.message);
-      return { success: false, error: error.message };
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
-    setUser(null);
-    window.dispatchEvent(new Event('user-logged-out'));
-  };
-
-  const register = async (userData) => {
-    try {
-      setError(null);
-      const data = await apiFetch('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(userData)
-      });
-
-      return { success: true, message: data.message };
-    } catch (error) {
-      setError(error.message);
-      return { success: false, error: error.message };
     }
   };
 
@@ -129,4 +243,4 @@ export const useAuth = () => {
     getUserFromToken,
     isAuthenticated: !!user
   };
-}; 
+};

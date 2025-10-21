@@ -1,0 +1,235 @@
+/** @type {import('next').NextConfig} */
+import withBundleAnalyzer from '@next/bundle-analyzer';
+
+const bundleAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+const nextConfig = {
+  // output: 'export', // Development için geçici olarak kapatıldı
+  trailingSlash: true,
+  
+  // Development optimizations
+  compiler: {
+    removeConsole: false, // Keep console logs in dev
+  },
+  // Static export için gerekli ayarlar
+  // experimental: {
+  //   appDir: false
+  // },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '5000',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'atkigetir-backend.onrender.com',
+        pathname: '/uploads/**',
+      },
+    ],
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    unoptimized: true, // Geçici olarak tüm ortamlarda kapatıldı
+    minimumCacheTTL: 31536000, // 1 yıl cache
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Performance optimizations
+    loader: 'default'
+  },
+  compress: true,
+  poweredByHeader: false,
+  generateEtags: false,
+  reactStrictMode: true,
+  
+  // Performance optimizations
+  experimental: {
+    optimizeCss: false, // CSS optimizasyonu geçici olarak kapatıldı
+    scrollRestoration: true,
+    optimizePackageImports: ['@heroicons/react', 'lucide-react'],
+    // Core Web Vitals optimizations
+    largePageDataBytes: 128 * 1000, // 128KB
+    // Modern bundling
+    esmExternals: true,
+  },
+  
+  // Fast Refresh'i tamamen devre dışı bırak
+  reactStrictMode: false,
+  
+  // Webpack optimizations
+  webpack: (config, { dev, isServer }) => {
+    // Development optimizations - Fast Refresh'i tamamen devre dışı bırak
+    if (dev) {
+      // Hot reload'u tamamen devre dışı bırak
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: false,
+        minimize: false,
+      };
+      
+      // Fast Refresh plugin'ini devre dışı bırak
+      config.plugins = config.plugins.filter(plugin => {
+        return plugin.constructor.name !== 'ReactRefreshPlugin';
+      });
+      
+      // Dev server ayarları
+      if (config.devServer) {
+        config.devServer.hot = false;
+        config.devServer.liveReload = false;
+      }
+    }
+    
+    // Production optimizations
+    if (!dev && !isServer) {
+      // Advanced code splitting
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        minSize: 20000,
+        maxSize: 244000,
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+            priority: 10,
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 5,
+            reuseExistingChunk: true,
+          },
+        },
+      };
+      
+      // Tree shaking optimization
+      config.optimization.usedExports = true;
+      config.optimization.sideEffects = false;
+    }
+    
+    // Bundle analyzer for development
+    if (process.env.ANALYZE === 'true') {
+      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'server',
+          openAnalyzer: true,
+        })
+      );
+    }
+    
+    return config;
+  },
+  
+  // Security Headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin'
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()'
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains'
+          }
+        ]
+      },
+      {
+        source: '/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      },
+      {
+        source: '/images/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      },
+      {
+        source: '/_next/static/css/(.*)',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/css; charset=utf-8'
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*'
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, HEAD, OPTIONS'
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type'
+          }
+        ]
+      },
+      {
+        source: '/_next/image(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable'
+          }
+        ]
+      }
+    ];
+  }
+};
+
+export default bundleAnalyzer(nextConfig);

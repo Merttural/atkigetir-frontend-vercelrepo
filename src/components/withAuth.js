@@ -10,10 +10,10 @@ export function withAdminAuth(WrappedComponent) {
 
     useEffect(() => {
       const checkAuth = () => {
-        const accessToken = localStorage.getItem('accessToken');
+        const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         
-        if (!accessToken) {
+        if (!token) {
           router.push('/login?redirect=' + router.pathname);
           return;
         }
@@ -58,9 +58,9 @@ export function withUserAuth(WrappedComponent) {
 
     useEffect(() => {
       const checkAuth = () => {
-        const accessToken = localStorage.getItem('accessToken');
+        const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
         
-        if (!accessToken) {
+        if (!token) {
           router.push('/login?redirect=' + router.pathname);
           return;
         }
@@ -108,6 +108,7 @@ export function useAuth() {
   }, []);
 
   const logout = () => {
+    localStorage.removeItem('token');
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');

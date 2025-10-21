@@ -1,12 +1,30 @@
 // API endpoint: /api/products/random
 // Basit rastgele ürün döndürür
 
+// Cache için global değişken
+let cachedProducts = null;
+let cacheTimestamp = null;
+const CACHE_DURATION = 2 * 60 * 1000; // 2 dakika
+let isBackendDown = false;
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
+    // Cache kontrolü
+    if (cachedProducts && cacheTimestamp && (Date.now() - cacheTimestamp) < CACHE_DURATION) {
+      console.log('Using cached products');
+      return res.status(200).json({ success: true, products: cachedProducts });
+    }
+
+    // Backend daha önce down ise ve cache varsa, cache'i kullan
+    if (isBackendDown && cachedProducts) {
+      console.log('Backend is down, using cached products');
+      return res.status(200).json({ success: true, products: cachedProducts });
+    }
+
     // Backend API URL'si
     const backendUrl = process.env.NODE_ENV === 'production' 
       ? 'https://atkigetir-backend.onrender.com' 
@@ -19,6 +37,7 @@ export default async function handler(req, res) {
     
     if (!response.ok) {
       console.log('Backend response not ok, using mock data');
+      isBackendDown = true;
       // Backend çalışmıyorsa mock data döndür
       const mockProducts = [
         {
@@ -50,6 +69,10 @@ export default async function handler(req, res) {
           image: '/images/placeholder.svg'
         }
       ];
+      
+      // Mock data'yı cache'e kaydet
+      cachedProducts = mockProducts;
+      cacheTimestamp = Date.now();
       
       return res.status(200).json({
         success: true,
@@ -87,6 +110,11 @@ export default async function handler(req, res) {
       randomProducts.push(...additionalProducts);
     }
     
+    // Cache'i güncelle
+    cachedProducts = randomProducts;
+    cacheTimestamp = Date.now();
+    isBackendDown = false; // Backend çalışıyor
+    
     res.status(200).json({
       success: true,
       products: randomProducts,
@@ -96,7 +124,9 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Random products API error:', error);
     
-    // Hata durumunda mock data döndür
+    // Backend bağlantı hatası durumunda mock data döndür
+    console.log('Using fallback mock data due to backend connection error');
+    isBackendDown = true;
     const mockProducts = [
       {
         _id: '1',
@@ -127,6 +157,10 @@ export default async function handler(req, res) {
         image: '/images/placeholder.svg'
       }
     ];
+    
+    // Mock data'yı cache'e kaydet
+    cachedProducts = mockProducts;
+    cacheTimestamp = Date.now();
     
     res.status(200).json({
       success: true,
