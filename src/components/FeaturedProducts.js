@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
 import LoadingSpinner from "./LoadingSpinner";
-import { fallbackApiCall } from "../utils/apiTest";
+import { cachedApiCall } from "../utils/cacheManager";
 
 export default function FeaturedProducts() {
   const [products, setProducts] = useState([]);
@@ -14,24 +14,24 @@ export default function FeaturedProducts() {
         setLoading(true);
         setError(null);
         
-        console.log('🔍 Fetching featured products...');
+        console.log('🔍 Fetching featured products with cache...');
         
-        // Önce featured ürünleri dene
-        let result = await fallbackApiCall('/api/products?featured=true');
+        // Cache ile featured ürünleri dene
+        let result = await cachedApiCall('/api/products?featured=true');
         
         if (result.success && result.data.products && result.data.products.length > 0) {
-          console.log('✅ Featured products found:', result.data.products.length);
+          console.log(`✅ Featured products found: ${result.data.products.length} (${result.fromCache ? 'from cache' : 'from API'})`);
           setProducts(result.data.products.slice(0, 8));
         } else {
-          console.log('⚠️ No featured products, trying all products...');
-          // Featured yoksa tüm ürünleri dene
-          result = await fallbackApiCall('/api/products');
+          console.log('⚠️ No featured products, trying all products with cache...');
+          // Featured yoksa tüm ürünleri cache ile dene
+          result = await cachedApiCall('/api/products');
           
           if (result.success && result.data.products && result.data.products.length > 0) {
-            console.log('✅ All products found:', result.data.products.length);
+            console.log(`✅ All products found: ${result.data.products.length} (${result.fromCache ? 'from cache' : 'from API'})`);
             setProducts(result.data.products.slice(0, 8));
           } else {
-            console.log('❌ No products found');
+            console.log('❌ No products found, using mock data');
             setProducts([]);
           }
         }

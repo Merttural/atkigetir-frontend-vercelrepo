@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { useState, useEffect } from "react";
 import ProductCard from '@/components/ProductCard';
-import { fallbackApiCall } from '../../utils/apiTest';
+import { cachedApiCall } from '../../utils/cacheManager';
 
 export default function UrunlerPage() {
   const [products, setProducts] = useState([]);
@@ -15,12 +15,12 @@ export default function UrunlerPage() {
       try {
         setLoading(true);
         setError("");
-        console.log('🔍 Fetching all products...');
+        console.log('🔍 Fetching all products with cache...');
         
-        const result = await fallbackApiCall('/api/products');
+        const result = await cachedApiCall('/api/products');
         
         if (result.success && result.data.products) {
-          console.log('✅ Products loaded:', result.data.products.length);
+          console.log(`✅ Products loaded: ${result.data.products.length} (${result.fromCache ? 'from cache' : 'from API'})`);
           setProducts(result.data.products);
         } else {
           console.log('❌ Failed to load products');
