@@ -188,7 +188,13 @@ function AdminProducts() {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
+        let errorData;
+        try {
+          errorData = await res.json();
+        } catch (jsonError) {
+          console.error('JSON parsing error:', jsonError);
+          throw new Error(`HTTP ${res.status}: Backend'den geçersiz response`);
+        }
         console.error('Backend error:', errorData);
         throw new Error(errorData.error || errorData.message || 'İşlem başarısız');
       }

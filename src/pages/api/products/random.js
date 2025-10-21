@@ -38,6 +38,12 @@ export default async function handler(req, res) {
     if (!response.ok) {
       console.log('Backend response not ok, using mock data');
       isBackendDown = true;
+      
+      // Rate limit veya diğer hatalar için mock data döndür
+      if (response.status === 429) {
+        console.log('Rate limit exceeded, using cached or mock data');
+      }
+      
       // Backend çalışmıyorsa mock data döndür
       const mockProducts = [
         {
@@ -81,7 +87,41 @@ export default async function handler(req, res) {
       });
     }
     
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      console.error('JSON parsing error:', jsonError);
+      console.log('Backend returned invalid JSON, using mock data');
+      isBackendDown = true;
+      
+      const mockProducts = [
+        {
+          _id: '1',
+          name: 'Örnek Atkı',
+          price: 150,
+          category: 'atkı',
+          image: '/images/placeholder.svg'
+        },
+        {
+          _id: '2',
+          name: 'Örnek Forma',
+          price: 200,
+          category: 'forma',
+          image: '/images/placeholder.svg'
+        }
+      ];
+      
+      cachedProducts = mockProducts;
+      cacheTimestamp = Date.now();
+      
+      return res.status(200).json({
+        success: true,
+        products: mockProducts,
+        count: mockProducts.length
+      });
+    }
+    
     const allProducts = data.products || [];
     
     if (allProducts.length === 0) {
