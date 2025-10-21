@@ -10,32 +10,24 @@ function AdminProducts() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [uploading, setUploading] = useState(false);
 
-  // Form state
+  // Sadeleştirilmiş form state
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
     category: '',
     stock: '',
+    stockStatus: 'var', // 'var' veya 'yok'
     image: '',
-    active: true,
-    // SEO alanları
-    slug: '',
-    seoTitle: '',
-    seoDescription: '',
-    // Ürün detay alanları
-    details: '',
-    features: '',
-    // Ek alanlar
-    brand: '',
-    model: '',
-    color: '',
-    size: '',
-    weight: '',
-    material: '',
-    tags: ''
+    active: true
   });
+
+  // Çoklu resim yükleme state
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [primaryImageIndex, setPrimaryImageIndex] = useState(0);
 
   useEffect(() => {
     fetchProducts();
@@ -95,24 +87,94 @@ function AdminProducts() {
     setLoading(false);
   };
 
+  // Çoklu resim seçimi
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      setSelectedImages(files);
+      
+      // Preview'ları oluştur
+      const previews = [];
+      files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          previews[index] = e.target.result;
+          if (previews.length === files.length) {
+            setImagePreviews([...previews]);
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  // Ön resim seçimi
+  const setPrimaryImage = (index) => {
+    setPrimaryImageIndex(index);
+  };
+
+  // Resim silme
+  const removeImage = (index) => {
+    const newImages = selectedImages.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setSelectedImages(newImages);
+    setImagePreviews(newPreviews);
+    
+    if (primaryImageIndex >= newImages.length) {
+      setPrimaryImageIndex(Math.max(0, newImages.length - 1));
+    }
+  };
+
+  // Çoklu resim yükleme
+  const uploadImages = async (files) => {
+    const uploadPromises = files.map(async (file) => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Resim yüklenemedi');
+      }
+
+      const data = await response.json();
+      return data.imageUrl;
+    });
+
+    return Promise.all(uploadPromises);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Form verilerini hazırla
-    const submitData = {
-      ...formData,
-      // Features'ı array'e çevir
-      features: formData.features ? formData.features.split('\n').filter(f => f.trim()) : [],
-      // Tags'ı array'e çevir
-      tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(t => t) : [],
-      // Slug otomatik oluştur (eğer boşsa)
-      slug: formData.slug || formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-    };
+    setUploading(true);
     
     try {
+      let imageUrl = formData.image;
+      let additionalImages = [];
+
+      // Çoklu resim varsa yükle
+      if (selectedImages.length > 0) {
+        const uploadedUrls = await uploadImages(selectedImages);
+        imageUrl = uploadedUrls[primaryImageIndex]; // Ön resim
+        additionalImages = uploadedUrls.filter((_, index) => index !== primaryImageIndex);
+      }
+      
+      // Form verilerini hazırla
+      const submitData = {
+        ...formData,
+        image: imageUrl,
+        additionalImages: additionalImages,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock)
+      };
+      
       const url = editingProduct 
-        ? `https://atkigetir-backend.onrender.com/api/products/${editingProduct._id}`
-        : 'https://atkigetir-backend.onrender.com/api/products';
+        ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/${editingProduct._id}`
+        : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products`;
       
       const method = editingProduct ? 'PUT' : 'POST';
       
@@ -120,12 +182,15 @@ function AdminProducts() {
         method,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(submitData),
       });
 
       if (!res.ok) {
-        throw new Error('İşlem başarısız');
+        const errorData = await res.json();
+        console.error('Backend error:', errorData);
+        throw new Error(errorData.error || errorData.message || 'İşlem başarısız');
       }
 
       // Form'u temizle ve listeyi yenile
@@ -135,24 +200,13 @@ function AdminProducts() {
         price: '',
         category: '',
         stock: '',
+        stockStatus: 'var',
         image: '',
-        active: true,
-        // SEO alanları
-        slug: '',
-        seoTitle: '',
-        seoDescription: '',
-        // Ürün detay alanları
-        details: '',
-        features: '',
-        // Ek alanlar
-        brand: '',
-        model: '',
-        color: '',
-        size: '',
-        weight: '',
-        material: '',
-        tags: ''
+        active: true
       });
+      setSelectedImages([]);
+      setImagePreviews([]);
+      setPrimaryImageIndex(0);
       setShowAddForm(false);
       setEditingProduct(null);
       fetchProducts();
@@ -160,6 +214,8 @@ function AdminProducts() {
       alert(editingProduct ? 'Ürün güncellendi!' : 'Ürün eklendi!');
     } catch (e) {
       alert('Hata: ' + e.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -167,8 +223,11 @@ function AdminProducts() {
     if (!confirm('Bu ürünü silmek istediğinizden emin misiniz?')) return;
     
     try {
-      const res = await fetch(`https://atkigetir-backend.onrender.com/api/products/${productId}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/${productId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
       
       if (!res.ok) {
@@ -190,24 +249,13 @@ function AdminProducts() {
       price: product.price || '',
       category: product.category || '',
       stock: product.stock || '',
+      stockStatus: product.stockStatus || 'var',
       image: product.image || '',
-      active: product.active !== false,
-      // SEO alanları
-      slug: product.slug || '',
-      seoTitle: product.seoTitle || '',
-      seoDescription: product.seoDescription || '',
-      // Ürün detay alanları
-      details: product.details || '',
-      features: Array.isArray(product.features) ? product.features.join('\n') : product.features || '',
-      // Ek alanlar
-      brand: product.brand || '',
-      model: product.model || '',
-      color: product.color || '',
-      size: product.size || '',
-      weight: product.weight || '',
-      material: product.material || '',
-      tags: Array.isArray(product.tags) ? product.tags.join(', ') : product.tags || ''
+      active: product.active !== false
     });
+    setSelectedImages([]);
+    setImagePreviews([]);
+    setPrimaryImageIndex(0);
     setShowAddForm(true);
   };
 
@@ -264,25 +312,20 @@ function AdminProducts() {
                   price: '',
                   category: '',
                   stock: '',
+                  stockStatus: 'var',
                   image: '',
-                  active: true,
-                  slug: '',
-                  seoTitle: '',
-                  seoDescription: '',
-                  details: '',
-                  features: '',
-                  brand: '',
-                  model: '',
-                  color: '',
-                  size: '',
-                  weight: '',
-                  material: '',
-                  tags: ''
+                  active: true
                 });
+                setSelectedImages([]);
+                setImagePreviews([]);
+                setPrimaryImageIndex(0);
               }}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center gap-2"
             >
-              + Yeni Ürün
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Yeni Ürün
             </button>
           </div>
           {error && (
@@ -455,62 +498,67 @@ function AdminProducts() {
                                   <div className="flex items-center">
                                     <div className="flex-shrink-0 h-10 w-10">
                                       <img
-                              className="h-10 w-10 rounded object-cover"
-                              src={product.image || '/images/placeholder.svg'}
-                              alt={product.name}
-                              onError={(e) => {
-                                e.target.src = '/images/placeholder.svg';
-                              }}
-                            />
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {product.name}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {product.description?.substring(0, 50)}...
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                          {product.category}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ₺{product.price}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          product.stock > 10 ? 'bg-green-100 text-green-800' :
-                          product.stock > 0 ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {product.stock}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          product.active !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {product.active !== false ? 'Aktif' : 'Pasif'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => handleEdit(product)}
-                          className="text-blue-600 hover:text-blue-900 mr-3"
-                        >
-                          Düzenle
-                        </button>
-                        <button
-                          onClick={() => handleDelete(product._id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Sil
-                        </button>
-                      </td>
+                                        className="h-10 w-10 rounded object-cover"
+                                        src={product.image || '/images/placeholder.svg'}
+                                        alt={product.name}
+                                        onError={(e) => {
+                                          e.target.src = '/images/placeholder.svg';
+                                        }}
+                                      />
+                                    </div>
+                                    <div className="ml-4">
+                                      <div className="text-sm font-medium text-gray-900">
+                                        {product.name}
+                                      </div>
+                                      <div className="text-sm text-gray-500">
+                                        {product.description?.substring(0, 50)}...
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    {product.category}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                  ₺{product.price}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="flex flex-col space-y-1">
+                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                      product.stockStatus === 'var' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    }`}>
+                                      {product.stockStatus === 'var' ? 'Var' : 'Yok'}
+                                    </span>
+                                    {product.stockStatus === 'var' && (
+                                      <span className="text-xs text-gray-500">
+                                        Miktar: {product.stock}
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                    product.active !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                  }`}>
+                                    {product.active !== false ? 'Aktif' : 'Pasif'}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                  <button
+                                    onClick={() => handleEdit(product)}
+                                    className="text-blue-600 hover:text-blue-900 mr-3"
+                                  >
+                                    Düzenle
+                                  </button>
+                                  <button
+                                    onClick={() => handleDelete(product._id)}
+                                    className="text-red-600 hover:text-red-900"
+                                  >
+                                    Sil
+                                  </button>
+                                </td>
                               </tr>
                             )}
                           </Draggable>
@@ -525,10 +573,10 @@ function AdminProducts() {
           )}
         </div>
 
-        {/* Add/Edit Product Modal */}
+        {/* Sadeleştirilmiş Add/Edit Product Modal */}
         {showAddForm && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-2/3 lg:w-1/2 shadow-lg rounded-md bg-white">
               <div className="mt-3">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
                   {editingProduct ? 'Ürün Düzenle' : 'Yeni Ürün Ekle'}
@@ -546,6 +594,7 @@ function AdminProducts() {
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ürün adını girin"
                       />
                     </div>
 
@@ -559,6 +608,7 @@ function AdminProducts() {
                         value={formData.category}
                         onChange={(e) => setFormData({...formData, category: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Kategori girin"
                       />
                     </div>
                   </div>
@@ -573,10 +623,11 @@ function AdminProducts() {
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Ürün açıklaması"
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Fiyat (₺) *
@@ -588,12 +639,31 @@ function AdminProducts() {
                         value={formData.price}
                         onChange={(e) => setFormData({...formData, price: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="0.00"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Stok *
+                        Stok Durumu *
+                      </label>
+                      <select
+                        required
+                        value={formData.stockStatus}
+                        onChange={(e) => setFormData({...formData, stockStatus: e.target.value})}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="var">Var</option>
+                        <option value="yok">Yok</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Stok miktarı sadece "Var" seçildiğinde göster */}
+                  {formData.stockStatus === 'var' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Stok Miktarı *
                       </label>
                       <input
                         type="number"
@@ -601,186 +671,83 @@ function AdminProducts() {
                         value={formData.stock}
                         onChange={(e) => setFormData({...formData, stock: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Stok miktarını girin"
                       />
                     </div>
+                  )}
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Resim URL
-                      </label>
-                      <input
-                        type="url"
-                        value={formData.image}
-                        onChange={(e) => setFormData({...formData, image: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Resim URL (Opsiyonel)
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.image}
+                      onChange={(e) => setFormData({...formData, image: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="https://example.com/image.jpg"
+                    />
                   </div>
 
-                  {/* SEO Alanları */}
-                  <div className="border-t pt-4">
-                    <h4 className="text-md font-medium text-gray-900 mb-3">SEO Bilgileri</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Slug
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.slug}
-                          onChange={(e) => setFormData({...formData, slug: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+                  {/* Çoklu Resim Yükleme */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Resimler Yükle (Birden fazla seçebilirsiniz)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    
+                    {/* Resim Preview'ları */}
+                    {imagePreviews.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-sm font-medium text-gray-700 mb-2">
+                          Yüklenen Resimler ({imagePreviews.length} adet)
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {imagePreviews.map((preview, index) => (
+                            <div key={index} className="relative group">
+                              <img 
+                                src={preview} 
+                                alt={`Preview ${index + 1}`} 
+                                className={`w-full h-24 object-cover rounded-md border-2 cursor-pointer transition-all ${
+                                  index === primaryImageIndex 
+                                    ? 'border-blue-500 ring-2 ring-blue-200' 
+                                    : 'border-gray-300 hover:border-blue-300'
+                                }`}
+                                onClick={() => setPrimaryImage(index)}
+                              />
+                              
+                              {/* Ön resim etiketi */}
+                              {index === primaryImageIndex && (
+                                <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                                  Ön Resim
+                                </div>
+                              )}
+                              
+                              {/* Silme butonu */}
+                              <button
+                                type="button"
+                                onClick={() => removeImage(index)}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        <p className="text-sm text-gray-500 mt-2">
+                          💡 Mavi çerçeveli resim ön resim olacak. Tıklayarak değiştirebilirsiniz.
+                          <br />
+                          🔧 Tüm resimler Sharp ile WebP formatına dönüştürülecek.
+                        </p>
                       </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          SEO Başlık
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.seoTitle}
-                          onChange={(e) => setFormData({...formData, seoTitle: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        SEO Açıklama
-                      </label>
-                      <textarea
-                        rows={2}
-                        value={formData.seoDescription}
-                        onChange={(e) => setFormData({...formData, seoDescription: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Ürün Detayları */}
-                  <div className="border-t pt-4">
-                    <h4 className="text-md font-medium text-gray-900 mb-3">Ürün Detayları</h4>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Detaylı Açıklama
-                      </label>
-                      <textarea
-                        rows={4}
-                        value={formData.details}
-                        onChange={(e) => setFormData({...formData, details: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <div className="mt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Özellikler (Her satıra bir özellik)
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={formData.features}
-                        onChange={(e) => setFormData({...formData, features: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="%100 pamuk&#10;Yıkanabilir&#10;Unisex"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Fiziksel Özellikler */}
-                  <div className="border-t pt-4">
-                    <h4 className="text-md font-medium text-gray-900 mb-3">Fiziksel Özellikler</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Marka
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.brand}
-                          onChange={(e) => setFormData({...formData, brand: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Model
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.model}
-                          onChange={(e) => setFormData({...formData, model: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Renk
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.color}
-                          onChange={(e) => setFormData({...formData, color: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Boyut
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.size}
-                          onChange={(e) => setFormData({...formData, size: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Ağırlık (gram)
-                        </label>
-                        <input
-                          type="number"
-                          value={formData.weight}
-                          onChange={(e) => setFormData({...formData, weight: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Malzeme
-                        </label>
-                        <input
-                          type="text"
-                          value={formData.material}
-                          onChange={(e) => setFormData({...formData, material: e.target.value})}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-3">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Etiketler (virgülle ayırın)
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.tags}
-                        onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="atkı, bere, kış, moda"
-                      />
-                    </div>
+                    )}
                   </div>
 
                   {/* Durum */}
@@ -804,6 +771,9 @@ function AdminProducts() {
                       onClick={() => {
                         setShowAddForm(false);
                         setEditingProduct(null);
+                        setSelectedImages([]);
+                        setImagePreviews([]);
+                        setPrimaryImageIndex(0);
                       }}
                       className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
                     >
@@ -811,9 +781,14 @@ function AdminProducts() {
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                      disabled={uploading}
+                      className={`px-4 py-2 rounded-md ${
+                        uploading 
+                          ? 'bg-gray-400 cursor-not-allowed' 
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      } text-white`}
                     >
-                      {editingProduct ? 'Güncelle' : 'Ekle'}
+                      {uploading ? 'Yükleniyor...' : (editingProduct ? 'Güncelle' : 'Ekle')}
                     </button>
                   </div>
                 </form>
@@ -826,4 +801,4 @@ function AdminProducts() {
   );
 }
 
-export default withAdminAuth(AdminProducts); 
+export default withAdminAuth(AdminProducts);
