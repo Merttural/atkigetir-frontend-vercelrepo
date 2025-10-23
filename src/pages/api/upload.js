@@ -87,8 +87,10 @@ export default async function handler(req, res) {
       .webp({ quality: 85 }) // WebP formatında %85 kalite
       .toFile(outputPath);
 
-    // URL oluştur
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    // URL oluştur - Production'da mutlaka doğru domain kullan
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://atkigetir.com'  // Sabit production URL
+      : (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000');
     const imageUrl = `${baseUrl}/uploads/products/${outputFilename}`;
 
     res.status(200).json({ imageUrl });

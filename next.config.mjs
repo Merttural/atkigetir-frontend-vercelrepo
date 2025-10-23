@@ -25,6 +25,11 @@ const nextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'atkigetir.com',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'www.atkigetir.com',
         pathname: '/uploads/**',
       },

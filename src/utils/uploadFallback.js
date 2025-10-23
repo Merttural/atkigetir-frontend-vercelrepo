@@ -20,11 +20,12 @@ export const uploadImageWithFallback = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
     
-    // Backend URL'leri
+    // Backend URL'leri - önce local API'yi dene, sonra backend'leri
     const backendUrls = [
-      'https://atkigetir-backend.onrender.com',
-      'https://api.atkigetir.com',
-      process.env.NEXT_PUBLIC_API_URL
+      '/api/upload', // Local Next.js API route
+      process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api/upload` : null,
+      'https://atkigetir-backend.onrender.com/api/upload',
+      'https://api.atkigetir.com/api/upload'
     ].filter(Boolean);
     
     // Her backend'i dene
@@ -32,7 +33,7 @@ export const uploadImageWithFallback = async (file) => {
       try {
         console.log(`Trying upload to ${backendUrl}`);
         
-        const response = await fetch(`${backendUrl}/api/upload`, {
+        const response = await fetch(backendUrl, {
           method: 'POST',
           body: formData
         });
