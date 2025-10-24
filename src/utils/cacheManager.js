@@ -102,8 +102,9 @@ export const cachedApiCall = async (endpoint, fallbackData = null) => {
       console.log(`🔍 Attempt ${attempt}/${maxRetries} - Trying backend...`);
       
       const baseUrls = [
-        'https://atkigetir-backend.onrender.com',
-        'https://api.atkigetir.com',
+        // Backend'ler rate limit'te, geçici olarak devre dışı
+        // 'https://atkigetir-backend.onrender.com',
+        // 'https://api.atkigetir.com',
         process.env.NEXT_PUBLIC_API_URL
       ].filter(Boolean);
 

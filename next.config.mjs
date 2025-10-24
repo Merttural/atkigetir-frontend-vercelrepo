@@ -33,7 +33,22 @@ const nextConfig = {
         hostname: 'www.atkigetir.com',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'ik.imagekit.io',
+        pathname: '/**',
+      },
     ],
+  },
+  
+  // Static file serving için
+  async rewrites() {
+    return [
+      {
+        source: '/uploads/:path*',
+        destination: '/uploads/:path*',
+      },
+    ];
   },
   
   // Webpack config - Fast Refresh'i tamamen kapat

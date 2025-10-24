@@ -29,8 +29,9 @@ export const testBackendConnection = async () => {
 // Fallback API çağrısı - Rate limit handling ile
 export const fallbackApiCall = async (endpoint) => {
   const baseUrls = [
-    'https://atkigetir-backend.onrender.com',
-    'https://api.atkigetir.com',
+    // Backend'ler rate limit'te, geçici olarak devre dışı
+    // 'https://atkigetir-backend.onrender.com',
+    // 'https://api.atkigetir.com',
     process.env.NEXT_PUBLIC_API_URL
   ].filter(Boolean);
   

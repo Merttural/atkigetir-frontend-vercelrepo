@@ -1,7 +1,31 @@
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { withAdminAuth } from '@/components/withAuth';
-import { uploadMultipleImages } from '../../utils/uploadFallback';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+
+// ImageKit upload fonksiyonu
+const uploadToImageKit = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error);
+    }
+    
+    const result = await response.json();
+    return result.url;
+  } catch (error) {
+    console.error('ImageKit upload hatası:', error);
+    throw error;
+  }
+};
 
 function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -24,6 +48,10 @@ function AdminProducts() {
     image: '',
     active: true
   });
+
+  // SEO için resim alanları
+  const [imageAlt, setImageAlt] = useState('');
+  const [imageTitle, setImageTitle] = useState('');
 
   // Çoklu resim yükleme state
   const [selectedImages, setSelectedImages] = useState([]);
@@ -153,15 +181,16 @@ function AdminProducts() {
     }
   };
 
-  // Çoklu resim yükleme - Fallback sistemi ile
+  // Çoklu resim yükleme - ImageKit ile
   const uploadImages = async (files) => {
     try {
-      console.log('🖼️ Starting image upload with fallback system...');
-      const imageUrls = await uploadMultipleImages(files);
-      console.log('✅ All images uploaded successfully:', imageUrls);
+      console.log('🖼️ Starting ImageKit upload...');
+      const uploadPromises = files.map(file => uploadToImageKit(file));
+      const imageUrls = await Promise.all(uploadPromises);
+      console.log('✅ All images uploaded to ImageKit:', imageUrls);
       return imageUrls;
     } catch (error) {
-      console.error('❌ Image upload failed:', error);
+      console.error('❌ ImageKit upload failed:', error);
       throw new Error(`Resim yükleme hatası: ${error.message}`);
     }
   };
@@ -169,6 +198,21 @@ function AdminProducts() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUploading(true);
+    
+    // SEO alanları kontrolü
+    if (selectedImages.length > 0) {
+      if (!imageAlt.trim()) {
+        alert('Resim alt metni zorunludur (SEO için önemli)');
+        setUploading(false);
+        return;
+      }
+      
+      if (!imageTitle.trim()) {
+        alert('Resim başlığı zorunludur (SEO için önemli)');
+        setUploading(false);
+        return;
+      }
+    }
     
     try {
       let imageUrl = formData.image;
@@ -255,6 +299,10 @@ function AdminProducts() {
         image: '',
         active: true
       });
+      
+      // SEO alanlarını da temizle
+      setImageAlt('');
+      setImageTitle('');
       setSelectedImages([]);
       setImagePreviews([]);
       setPrimaryImageIndex(0);
@@ -367,6 +415,10 @@ function AdminProducts() {
                   image: '',
                   active: true
                 });
+                
+                // SEO alanlarını da temizle
+                setImageAlt('');
+                setImageTitle('');
                 setSelectedImages([]);
                 setImagePreviews([]);
                 setPrimaryImageIndex(0);
@@ -547,11 +599,13 @@ function AdminProducts() {
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                   <div className="flex items-center">
-                                    <div className="flex-shrink-0 h-10 w-10">
-                                      <img
-                                        className="h-10 w-10 rounded object-cover"
+                                    <div className="flex-shrink-0 h-10 w-10 relative">
+                                      <Image
+                                        className="rounded object-cover"
                                         src={product.image || '/images/placeholder.svg'}
                                         alt={product.name}
+                                        fill
+                                        sizes="40px"
                                         onError={(e) => {
                                           e.target.src = '/images/placeholder.svg';
                                         }}
@@ -753,19 +807,57 @@ function AdminProducts() {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     
-                    {/* Resim Preview'ları */}
+                    {/* SEO Alanları - Resim yüklendiyse göster */}
                     {imagePreviews.length > 0 && (
-                      <div className="mt-4">
+                      <div className="mt-4 space-y-4">
+                        {/* Alt Text Alanı */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Resim Alt Metni * (SEO için önemli)
+                          </label>
+                          <input
+                            type="text"
+                            value={imageAlt}
+                            onChange={(e) => setImageAlt(e.target.value)}
+                            placeholder="Örn: Mavi renkli yün atkı, kış koleksiyonu"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Arama motorları için resim açıklaması
+                          </p>
+                        </div>
+
+                        {/* Title Alanı */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Resim Başlığı * (SEO için önemli)
+                          </label>
+                          <input
+                            type="text"
+                            value={imageTitle}
+                            onChange={(e) => setImageTitle(e.target.value)}
+                            placeholder="Örn: Premium Yün Atkı - Mavi Renk"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Resim başlığı (title attribute için)
+                          </p>
+                        </div>
+
                         <p className="text-sm font-medium text-gray-700 mb-2">
                           Yüklenen Resimler ({imagePreviews.length} adet)
                         </p>
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                           {imagePreviews.map((preview, index) => (
                             <div key={index} className="relative group">
-                              <img 
+                              <Image 
                                 src={preview} 
                                 alt={`Preview ${index + 1}`} 
-                                className={`w-full h-24 object-cover rounded-md border-2 cursor-pointer transition-all ${
+                                width={96}
+                                height={96}
+                                className={`object-cover rounded-md border-2 cursor-pointer transition-all ${
                                   index === primaryImageIndex 
                                     ? 'border-blue-500 ring-2 ring-blue-200' 
                                     : 'border-gray-300 hover:border-blue-300'

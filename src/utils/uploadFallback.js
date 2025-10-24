@@ -22,10 +22,9 @@ export const uploadImageWithFallback = async (file) => {
     
     // Backend URL'leri - önce local API'yi dene, sonra backend'leri
     const backendUrls = [
-      '/api/upload', // Local Next.js API route
-      process.env.NEXT_PUBLIC_API_URL ? `${process.env.NEXT_PUBLIC_API_URL}/api/upload` : null,
-      'https://atkigetir-backend.onrender.com/api/upload',
-      'https://api.atkigetir.com/api/upload'
+      '/api/upload', // Local Next.js API route (ÖNCELİK - ImageKit ile)
+      'https://atkigetir-backend.onrender.com/api/upload', // Backend fallback
+      'https://api.atkigetir.com/api/upload' // Production backend fallback
     ].filter(Boolean);
     
     // Her backend'i dene
@@ -41,7 +40,8 @@ export const uploadImageWithFallback = async (file) => {
         if (response.ok) {
           const data = await response.json();
           console.log(`✅ Upload successful to ${backendUrl}`);
-          return data.imageUrl;
+          // ImageKit response format: { url, ... } veya backend format: { imageUrl }
+          return data.url || data.imageUrl;
         } else if (response.status === 429) {
           console.log(`⚠️ Rate limit on ${backendUrl}, trying next...`);
           continue;

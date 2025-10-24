@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useCart } from '@/hooks/useCart';
 import LoadingSpinner from '@/components/LoadingSpinner';
@@ -147,11 +148,13 @@ export default function SepetPage() {
                 <div className="space-y-4">
                   {cartItems.map((item) => (
                     <div key={item._id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0">
-                        <img
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 relative">
+                        <Image
                           src={item.image || '/images/placeholder.jpg'}
                           alt={item.name}
-                          className="w-full h-full object-cover rounded-lg"
+                          fill
+                          className="object-cover rounded-lg"
+                          sizes="(max-width: 640px) 64px, 80px"
                         />
                       </div>
                       

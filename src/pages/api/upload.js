@@ -1,101 +1,137 @@
+import formidable from 'formidable';
 import sharp from 'sharp';
-import fs from 'fs';
-import path from 'path';
+import ImageKit from 'imagekit';
 
+// Next.js API için body parser'ı kapat
 export const config = {
   api: {
-    bodyParser: false, // Raw body için
+    bodyParser: false,
   },
 };
 
+// ImageKit client'ını başlat
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+});
+
+// Türkçe karakterleri slugify eden fonksiyon
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ı/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/[^a-z0-9 -]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim('-');
+}
+
 export default async function handler(req, res) {
+  // CORS headers ekle
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  // OPTIONS request için
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  // Sadece POST isteklerini kabul et
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ 
+      error: 'Sadece POST istekleri kabul edilir' 
+    });
   }
 
   try {
-    // Raw body'yi al
-    const chunks = [];
-    req.on('data', (chunk) => chunks.push(chunk));
-    
-    await new Promise((resolve, reject) => {
-      req.on('end', resolve);
-      req.on('error', reject);
+    // Formidable ile dosyayı parse et
+    const form = formidable({
+      maxFileSize: 10 * 1024 * 1024, // 10MB limit
+      filter: ({ mimetype }) => {
+        // Sadece resim dosyalarını kabul et
+        return mimetype && mimetype.startsWith('image/');
+      },
     });
 
-    const body = Buffer.concat(chunks);
+    const [fields, files] = await form.parse(req);
     
-    // Content-Type'dan boundary'yi çıkar
-    const contentType = req.headers['content-type'];
-    if (!contentType || !contentType.includes('multipart/form-data')) {
-      return res.status(400).json({ error: 'Content-Type must be multipart/form-data' });
+    // Dosya kontrolü
+    if (!files.image || !files.image[0]) {
+      return res.status(400).json({ 
+        error: 'Resim dosyası bulunamadı' 
+      });
     }
 
-    const boundary = contentType.split('boundary=')[1];
-    if (!boundary) {
-      return res.status(400).json({ error: 'No boundary found' });
+    const file = files.image[0];
+    
+    // Dosya tipi kontrolü
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif'];
+    if (!allowedTypes.includes(file.mimetype)) {
+      return res.status(415).json({ 
+        error: 'Desteklenmeyen dosya tipi. Sadece JPG, PNG, WebP, AVIF kabul edilir' 
+      });
     }
 
-    // Multipart data'yı parse et
-    const parts = body.toString('binary').split(`--${boundary}`);
-    let fileData = null;
-    let filename = null;
-
-    for (const part of parts) {
-      if (part.includes('Content-Disposition: form-data')) {
-        const nameMatch = part.match(/name="([^"]+)"/);
-        const fileMatch = part.match(/filename="([^"]+)"/);
-        
-        if (nameMatch && nameMatch[1] === 'file' && fileMatch) {
-          filename = fileMatch[1];
-          const headerEnd = part.indexOf('\r\n\r\n');
-          if (headerEnd !== -1) {
-            fileData = Buffer.from(part.substring(headerEnd + 4), 'binary');
-            break;
-          }
-        }
-      }
+    // Dosya boyutu kontrolü (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      return res.status(413).json({ 
+        error: 'Dosya boyutu çok büyük. Maksimum 10MB olmalı' 
+      });
     }
 
-    if (!fileData || !filename) {
-      return res.status(400).json({ error: 'No file found' });
-    }
-
-    // Dosya tipini kontrol et
-    const fileType = filename.toLowerCase().split('.').pop();
-    const allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    if (!allowedTypes.includes(fileType)) {
-      return res.status(400).json({ error: 'Sadece resim dosyaları yüklenebilir!' });
-    }
-
-    // Uploads klasörünü oluştur
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'products');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    // WebP formatında dosya adı
-    const outputFilename = `${Date.now()}.webp`;
-    const outputPath = path.join(uploadDir, outputFilename);
-
-    // Sharp ile resmi işle: boyutlandır, WebP'ye dönüştür ve kaydet
-    await sharp(fileData)
-      .resize(800, 800, {
+    // Sharp ile resmi optimize et
+    const optimizedBuffer = await sharp(file.filepath)
+      .resize(1200, 1200, {
         fit: 'inside', // Oranları koruyarak sığdır
-        withoutEnlargement: true // Büyükse küçült, küçükse büyütme
+        withoutEnlargement: true // Küçük resimleri büyütme
       })
-      .webp({ quality: 85 }) // WebP formatında %85 kalite
-      .toFile(outputPath);
+      .webp({ quality: 82 }) // WebP formatında %82 kalite
+      .toBuffer();
 
-    // URL oluştur - Production'da mutlaka doğru domain kullan
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://atkigetir.com'  // Sabit production URL
-      : (process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000');
-    const imageUrl = `${baseUrl}/uploads/products/${outputFilename}`;
+    // Dosya adı oluştur (ürün slug + timestamp + boyut)
+    const timestamp = Date.now();
+    const dimensions = await sharp(optimizedBuffer).metadata();
+    const fileName = `atki-${timestamp}-${dimensions.width}x${dimensions.height}.webp`;
 
-    res.status(200).json({ imageUrl });
+    // ImageKit'e yükle
+    const uploadResponse = await imagekit.upload({
+      file: optimizedBuffer,
+      fileName: fileName,
+      folder: 'atkigetir/products',
+      useUniqueFileName: false,
+      overwriteFile: false,
+    });
+
+    // Başarılı yanıt
+    res.status(200).json({
+      url: uploadResponse.url,
+      width: dimensions.width,
+      height: dimensions.height,
+      format: 'webp',
+      fileId: uploadResponse.fileId,
+      message: 'Resim başarıyla yüklendi'
+    });
+
   } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ error: error.message || 'Yükleme hatası!' });
+    console.error('Upload hatası:', error);
+    
+    // Hata tipine göre uygun HTTP kodu döndür
+    if (error.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ 
+        error: 'Dosya boyutu çok büyük' 
+      });
+    }
+    
+    return res.status(500).json({ 
+      error: 'Resim yükleme sırasında bir hata oluştu' 
+    });
   }
 }

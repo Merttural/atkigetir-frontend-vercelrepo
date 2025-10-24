@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ProductCard({ product, showCategoryBadge, priority = false }) {
   const [imageLoading, setImageLoading] = useState(true);
@@ -25,14 +26,18 @@ export default function ProductCard({ product, showCategoryBadge, priority = fal
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           )}
-          <img
+          <Image
             src={product.image || '/images/placeholder.svg'}
             alt={product.name}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${
+            fill
+            className={`object-cover transition-opacity duration-300 ${
               imageLoading ? 'opacity-0' : 'opacity-100'
             }`}
             onLoad={handleImageLoad}
             onError={handleImageError}
+            loading={priority ? "eager" : "lazy"}
+            priority={priority}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           {imageError && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-200">

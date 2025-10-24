@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useCart } from "@/hooks/useCart";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -295,10 +296,13 @@ export default function ProductDetail({ product: initialProduct }) {
         <div className="flex flex-col md:flex-row gap-10 items-center md:items-start">
           <div className="flex-1 w-full max-w-md">
             <div className="relative w-full h-96 rounded-2xl shadow-lg border border-gray-100 overflow-hidden bg-gray-50">
-              <img
+              <Image
                 src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover"
+                alt={`${product.name} - ${product.category}`}
+                fill
+                className="object-cover"
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
           </div>
