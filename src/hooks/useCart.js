@@ -4,14 +4,17 @@ export const useCart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [cartCount, setCartCount] = useState(0);
 
-  // Load cart from localStorage on mount
+  // Load cart from localStorage on mount (SSR-safe)
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
     setCartItems(savedCart);
     updateCartCount(savedCart);
 
     // Real-time cart update listener
     const handleCartUpdate = () => {
+      if (typeof window === 'undefined') return;
       const updatedCart = JSON.parse(localStorage.getItem('cart') || '[]');
       setCartItems(updatedCart);
       updateCartCount(updatedCart);
@@ -27,6 +30,7 @@ export const useCart = () => {
   };
 
   const addToCart = (product) => {
+    if (typeof window === 'undefined') return;
     const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
     const existingItemIndex = existingCart.findIndex(item => item._id === product._id);
     
@@ -72,6 +76,7 @@ export const useCart = () => {
   };
 
   const updateQuantity = (itemId, newQuantity) => {
+    if (typeof window === 'undefined') return;
     if (newQuantity <= 0) {
       removeFromCart(itemId);
       return;
@@ -96,6 +101,7 @@ export const useCart = () => {
   };
 
   const clearCart = () => {
+    if (typeof window === 'undefined') return;
     setCartItems([]);
     setCartCount(0);
     localStorage.removeItem('cart');

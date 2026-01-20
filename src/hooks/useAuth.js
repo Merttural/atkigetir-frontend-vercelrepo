@@ -8,10 +8,11 @@ export const useAuth = () => {
 
   // Environment-based API URL
   const getApiUrl = () => {
-    if (typeof window === 'undefined') return 'http://localhost:5000';
-    return process.env.NODE_ENV === 'production' 
-      ? 'https://atkigetir-backend.onrender.com' 
-      : 'http://localhost:5000';
+    if (typeof window === 'undefined') return process.env.NEXT_PUBLIC_API_URL || '';
+    return process.env.NEXT_PUBLIC_API_URL || 
+      (process.env.NODE_ENV === 'production' 
+        ? 'https://api.atkigetir.com' 
+        : '');
   };
 
   // Get user from token

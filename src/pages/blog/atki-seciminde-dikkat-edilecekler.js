@@ -8,8 +8,8 @@ export default function AtkiSecimiRehberi() {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     "headline": "Atkı Seçiminde Dikkat Edilmesi Gerekenler - 2024 Rehberi",
-    "image": "https://atkigetir.com/images/blog/atki-secimi.jpg",
-    "url": "https://atkigetir.com/blog/atki-seciminde-dikkat-edilecekler",
+    "image": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/images/atkıgörsel2.jpg`,
+    "url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/blog/atki-seciminde-dikkat-edilecekler`,
     "datePublished": "2024-01-20T08:00:00+08:00",
     "dateModified": "2024-01-20T09:00:00+08:00",
     "author": {
@@ -27,7 +27,7 @@ export default function AtkiSecimiRehberi() {
     "description": "Doğru atkı seçimi için kapsamlı rehber. Malzeme, boyut, renk ve bakım önerileri ile mükemmel atkıyı bulun.",
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": "https://atkigetir.com/blog/atki-seciminde-dikkat-edilecekler"
+      "@id": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/blog/atki-seciminde-dikkat-edilecekler`
     }
   };
 
@@ -49,7 +49,7 @@ export default function AtkiSecimiRehberi() {
           
           <div className="relative w-full h-80 mb-8 rounded-lg overflow-hidden">
             <Image
-              src="/images/blog/atki-secimi.jpg"
+              src="/images/atkıgörsel2.jpg"
               alt="Atkı Seçimi Rehberi"
               fill
               className="object-cover"

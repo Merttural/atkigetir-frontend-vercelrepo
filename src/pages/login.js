@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
+import { Mail, Lock, X, ArrowRight, AlertCircle, MessageCircle, Wrench } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "", remember: false });
@@ -40,11 +42,10 @@ export default function LoginPage() {
 
     try {
       // Environment-based API URL
-      const apiUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://atkigetir-backend.onrender.com' 
-        : 'http://localhost:5000';
-      
-      console.log("🔐 Login attempt:", { email: form.email, apiUrl });
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 
+        (process.env.NODE_ENV === 'production' 
+          ? 'https://api.atkigetir.com' 
+          : process.env.NEXT_PUBLIC_API_URL || '');
       
       const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
@@ -58,15 +59,12 @@ export default function LoginPage() {
         })
       });
       
-      console.log("📡 Response status:", response.status);
-      
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || `HTTP ${response.status}: Giriş başarısız`);
       }
       
       const data = await response.json();
-      console.log("📦 Success data:", data);
       
       // Backend'den gelen response'u kontrol et
       if (data.error) {
@@ -99,11 +97,7 @@ export default function LoginPage() {
       
       // Redirect parametresine göre yönlendir
       setTimeout(() => {
-        if (data.user && data.user.role === "admin") {
-          router.push(redirect.startsWith('/admin') ? redirect : "/admin");
-        } else {
-          router.push(redirect.startsWith('/admin') ? "/" : redirect);
-        }
+        router.push(redirect || "/");
       }, 1000);
       
     } catch (err) {
@@ -115,99 +109,160 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div ref={modalRef} className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 relative animate-fadeIn">
-        {/* Close button */}
-        <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl font-bold focus:outline-none"
-          onClick={() => router.push("/")}
-          aria-label="Kapat"
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+        onClick={() => router.push("/")}
+      >
+        <motion.div
+          ref={modalRef}
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          onClick={(e) => e.stopPropagation()}
+          className="bg-white rounded-[24px] shadow-2xl w-full max-w-md p-8 relative"
         >
-          ×
-        </button>
-        
-        <h1 className="text-2xl font-bold mb-6 text-center">Giriş Yap</h1>
-        
-        {/* Message göster */}
-        {message && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {message}
-          </div>
-        )}
-        
-        <form className="w-full flex flex-col gap-4" onSubmit={handleLogin}>
-          <div>
-            <label htmlFor="email" className="block mb-1 font-medium">E-posta</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">📧</span>
-              <input
-                id="email"
-                type="email"
-                placeholder="E-posta adresinizi girin"
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 placeholder-gray-400"
-                value={form.email}
-                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                required
-                disabled={loading}
-              />
-            </div>
-          </div>
+          {/* Close button */}
+          <motion.button
+            whileHover={{ scale: 1.1, rotate: 90 }}
+            whileTap={{ scale: 0.9 }}
+            className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors focus:outline-none"
+            onClick={() => router.push("/")}
+            aria-label="Kapat"
+          >
+            <X className="w-6 h-6" />
+          </motion.button>
           
-          <div>
-            <label htmlFor="password" className="block mb-1 font-medium">Şifre</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">🔒</span>
-              <input
-                id="password"
-                type="password"
-                placeholder="Şifrenizi girin"
-                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 placeholder-gray-400"
-                value={form.password}
-                onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                required
-                disabled={loading}
-              />
-            </div>
-          </div>
+          <h1 className="text-2xl font-bold text-[#0F172A] mb-6 text-center tracking-tighter">Giriş Yap</h1>
           
-          <div className="flex items-center justify-between text-sm mt-1">
-            <label className="flex items-center gap-2 select-none">
-              <input
-                type="checkbox"
-                checked={form.remember}
-                onChange={e => setForm(f => ({ ...f, remember: e.target.checked }))}
-                className="accent-blue-600"
-                disabled={loading}
-              />
-              Beni hatırla
-            </label>
-            <Link href="/forgot-password" className="text-blue-600 hover:text-blue-800">
-              Şifremi unuttum
-            </Link>
-          </div>
-          
-          {error && (
-            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
-              {error}
+          {/* Bakımda Mesajı */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-5 bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Wrench className="w-6 h-6 text-yellow-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-[#0F172A] mb-1 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-yellow-600" />
+                  Bu Özellik Geçici Olarak Bakımda
+                </h3>
+                <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                  Giriş yapma özelliği şu anda bakım aşamasındadır. Ürünler hakkında bilgi almak ve sipariş vermek için WhatsApp veya telefon ile iletişime geçebilirsiniz.
+                </p>
+                <div className="flex flex-col gap-2">
+                  <a
+                    href="https://wa.me/905337498266"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white py-2.5 px-4 rounded-lg font-semibold hover:from-[#16A34A] hover:to-[#15803d] transition-all shadow-md hover:shadow-[0_0_25px_rgba(34,197,94,0.4)] text-center flex items-center justify-center gap-2 text-sm group"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>WhatsApp'tan İletişime Geç</span>
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" />
+                  </a>
+                </div>
+              </div>
             </div>
+          </motion.div>
+          
+          {/* Message göster */}
+          {message && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm"
+            >
+              {message}
+            </motion.div>
           )}
           
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
-          </button>
-          
-          <div className="text-center text-sm text-gray-600">
-            Hesabınız yok mu?{" "}
-            <Link href="/register" className="text-blue-600 hover:text-blue-800 font-medium">
-              Kayıt olun
-            </Link>
-          </div>
-        </form>
-      </div>
-    </div>
+          <form className="w-full flex flex-col gap-4 opacity-50 pointer-events-none" onSubmit={(e) => { e.preventDefault(); }}>
+            <div>
+              <label htmlFor="email" className="block mb-2 text-sm font-medium text-[#0F172A]">E-posta</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="E-posta adresinizi girin"
+                  className="w-full pl-11 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] text-sm bg-white transition-all placeholder-slate-400"
+                  value={form.email}
+                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                  required
+                  disabled={loading}
+                />
+              </div>
+            </div>
+            
+            <div>
+              <label htmlFor="password" className="block mb-2 text-sm font-medium text-[#0F172A]">Şifre</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Şifrenizi girin"
+                  className="w-full pl-11 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] text-sm bg-white transition-all placeholder-slate-400"
+                  value={form.password}
+                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                  required
+                  disabled={loading}
+                />
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between text-sm mt-1">
+              <label className="flex items-center gap-2 select-none cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.remember}
+                  onChange={e => setForm(f => ({ ...f, remember: e.target.checked }))}
+                  className="w-4 h-4 rounded border-slate-300 text-[#2563EB] focus:ring-[#2563EB]"
+                  disabled={loading}
+                />
+                <span className="text-slate-600">Beni hatırla</span>
+              </label>
+              <Link href="/forgot-password" className="text-[#2563EB] hover:text-[#1e40af] font-medium transition-colors">
+                Şifremi unuttum
+              </Link>
+            </div>
+            
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm"
+              >
+                {error}
+              </motion.div>
+            )}
+            
+            <motion.button
+              type="button"
+              disabled={true}
+              className="w-full py-3.5 bg-slate-300 text-slate-500 rounded-xl font-semibold transition-all shadow-md cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <span>Bakımda - Giriş Yapılamıyor</span>
+            </motion.button>
+            
+            <div className="text-center text-sm text-slate-600 pt-2">
+              Hesabınız yok mu?{" "}
+              <Link href="/register" className="text-[#2563EB] hover:text-[#1e40af] font-medium transition-colors inline-flex items-center gap-1">
+                <span>Kayıt olun</span>
+                <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+          </form>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

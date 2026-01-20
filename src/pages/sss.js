@@ -1,8 +1,19 @@
 import SEO from "@/components/SEO";
+import Breadcrumbs from '@/components/Breadcrumbs';
 import Link from "next/link";
+import { ChevronDown, Plus, Minus, MessageCircle, Mail, HelpCircle, Package, FileText, Building2, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 
 export default function FAQPage() {
+  const [openFaq, setOpenFaq] = useState(null);
+
   const faqData = [
+    {
+      id: 9,
+      question: "Toplu sipariş indirimi var mı?",
+      answer: "Evet! 10 adet ve üzeri siparişlerde %15, 25 adet ve üzeri siparişlerde %20 indirim uygulanır. Kurumsal siparişler için özel fiyat teklifi alabilirsiniz."
+    },
     {
       id: 1,
       question: "Atkı siparişlerim ne kadar sürede hazırlanır?",
@@ -44,11 +55,6 @@ export default function FAQPage() {
       answer: "Standart atkı boyutlarımız 180x30 cm'dir. Özel boyut talepleriniz için bizimle iletişime geçebilirsiniz. Çocuk atkıları ve jumbo boy atkılar da mevcuttur."
     },
     {
-      id: 9,
-      question: "Toplu sipariş indirimi var mı?",
-      answer: "Evet! 10 adet ve üzeri siparişlerde %15, 25 adet ve üzeri siparişlerde %20 indirim uygulanır. Kurumsal siparişler için özel fiyat teklifi alabilirsiniz."
-    },
-    {
       id: 10,
       question: "Atkı seçiminde nelere dikkat etmeliyim?",
       answer: "Malzeme kalitesi, boyut, renk uyumu ve kullanım amacınıza göre seçim yapın. Kışlık kullanım için yün, şık görünüm için saten, günlük kullanım için akrilik önerilir."
@@ -77,103 +83,172 @@ export default function FAQPage() {
         }}
       />
 
-      <main className="max-w-4xl mx-auto py-10 px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Sıkça Sorulan Sorular
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Atkı siparişi, ödeme, kargo ve kullanım hakkında merak ettiğiniz 
-            tüm soruların cevaplarını burada bulabilirsiniz.
-          </p>
-        </div>
+      <div className="bg-[#F8FAFC] min-h-screen">
+        <div className="max-w-4xl mx-auto px-4 py-6">
+          <Breadcrumbs items={[
+            { name: 'Anasayfa', href: '/' },
+            { name: 'SSS', href: '/sss' }
+          ]} />
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Header */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-center mb-12"
+            >
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#2563EB] to-[#1e40af] flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <HelpCircle className="w-8 h-8 text-white" />
+              </div>
+              <h1 className="text-4xl font-bold text-[#0F172A] mb-4 tracking-tighter">
+                Sıkça Sorulan Sorular
+              </h1>
+              <p className="text-slate-500 max-w-2xl mx-auto text-lg leading-relaxed">
+                Atkı siparişi, ödeme, kargo ve kullanım hakkında merak ettiğiniz 
+                tüm soruların cevaplarını burada bulabilirsiniz.
+              </p>
+            </motion.div>
 
-        {/* FAQ List */}
-        <div className="space-y-6 mb-12">
-          {faqData.map((faq, index) => (
-            <div key={faq.id} className="bg-white rounded-lg shadow-md p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-start">
-                <span className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-0.5 flex-shrink-0">
-                  {index + 1}
-                </span>
-                {faq.question}
+            {/* FAQ List */}
+            <div className="space-y-4 mb-12">
+              {faqData.map((faq, index) => (
+                <motion.div
+                  key={faq.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className={`bg-gradient-to-b from-white to-gray-50 rounded-[24px] shadow-sm border border-slate-200 overflow-hidden transition-all duration-300 ${
+                    openFaq === index ? 'ring-2 ring-blue-500/20' : ''
+                  }`}
+                >
+                  <motion.button
+                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full flex items-center justify-between p-5 bg-transparent hover:bg-gray-50/50 transition-colors text-left active:scale-95"
+                    aria-expanded={openFaq === index}
+                    aria-controls={`faq-answer-${faq.id}`}
+                    aria-label={`${faq.question} - ${openFaq === index ? 'Cevabı gizle' : 'Cevabı göster'}`}
+                  >
+                    <div className="flex items-start gap-3 flex-1">
+                      <span className="bg-gradient-to-br from-[#2563EB] to-[#1e40af] text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5" aria-hidden="true">
+                        {index + 1}
+                      </span>
+                      <span className="font-semibold text-[#0F172A] text-sm flex-1" id={`faq-question-${faq.id}`}>{faq.question}</span>
+                    </div>
+                    <motion.div
+                      animate={{ rotate: openFaq === index ? 180 : 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      aria-hidden="true"
+                    >
+                      <ChevronDown className="w-5 h-5 text-slate-500 flex-shrink-0" />
+                    </motion.div>
+                  </motion.button>
+                  <AnimatePresence>
+                    {openFaq === index && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-5 pb-5 ml-10 text-slate-600 text-sm leading-relaxed">
+                          {faq.answer}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Contact CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="bg-gradient-to-br from-[#2563EB]/10 to-[#1e40af]/10 rounded-[24px] p-8 text-center border border-[#2563EB]/20 mb-12"
+            >
+              <h2 className="text-2xl font-bold text-[#0F172A] mb-4 tracking-tight">
+                Sorunuzun Cevabını Bulamadınız mı?
+              </h2>
+              <p className="text-slate-600 mb-6">
+                Uzman ekibimiz size yardımcı olmaktan mutluluk duyar. 
+                İletişim kanallarımızdan bize ulaşabilirsiniz.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <motion.a
+                  href="https://wa.me/905337498266?text=Merhabalar%20Kerim%20Bey%20Sipariş%20Vermek%20istiyorum."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white px-6 py-3 rounded-xl hover:from-[#16A34A] hover:to-[#15803d] transition-all shadow-md hover:shadow-[0_0_25px_rgba(34,197,94,0.4)] font-semibold inline-flex items-center justify-center gap-2 group"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  <span>WhatsApp ile Sor</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                </motion.a>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link
+                    href="/iletisim"
+                    className="bg-gradient-to-r from-[#2563EB] to-[#1e40af] text-white px-6 py-3 rounded-xl hover:from-[#1e40af] hover:to-[#1e3a8a] transition-all shadow-md hover:shadow-lg font-medium inline-flex items-center justify-center gap-2"
+                    aria-label="İletişim sayfasına git"
+                  >
+                    <Mail className="w-5 h-5" aria-hidden="true" />
+                    İletişim Sayfası
+                  </Link>
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* Related Links */}
+            <div>
+              <h3 className="text-xl font-bold text-[#0F172A] mb-6 text-center tracking-tight">
+                İlgili Sayfalar
               </h3>
-              <div className="ml-9">
-                <p className="text-gray-700 leading-relaxed">
-                  {faq.answer}
-                </p>
+              <div className="grid md:grid-cols-3 gap-4">
+                {[
+                  { href: '/urunler', icon: Package, title: 'Ürünlerimiz', desc: 'Atkı modellerimizi inceleyin', gradient: 'from-blue-500 to-cyan-500' },
+                  { href: '/blog', icon: FileText, title: 'Blog', desc: 'Atkı rehberleri ve ipuçları', gradient: 'from-purple-500 to-pink-500' },
+                  { href: '/hakkimizda', icon: Building2, title: 'Hakkımızda', desc: 'Atkigetir hikayesi', gradient: 'from-emerald-500 to-teal-500' }
+                ].map((link, index) => {
+                  const IconComponent = link.icon;
+                  return (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.7 + index * 0.1 }}
+                      whileHover={{ y: -4, scale: 1.02 }}
+                    >
+                      <Link
+                        href={link.href}
+                        className="bg-white border border-slate-200 rounded-[24px] p-6 hover:shadow-md transition-all text-center block"
+                        aria-label={`${link.title} sayfasına git - ${link.desc}`}
+                      >
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${link.gradient} flex items-center justify-center mx-auto mb-3`} aria-hidden="true">
+                          <IconComponent className="w-6 h-6 text-white" />
+                        </div>
+                        <h4 className="font-semibold text-[#0F172A] mb-1">{link.title}</h4>
+                        <p className="text-sm text-slate-500">{link.desc}</p>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
-          ))}
+          </motion.div>
         </div>
-
-        {/* Contact CTA */}
-        <div className="bg-blue-50 rounded-xl p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Sorunuzun Cevabını Bulamadınız mı?
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Uzman ekibimiz size yardımcı olmaktan mutluluk duyar. 
-            İletişim kanallarımızdan bize ulaşabilirsiniz.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="https://wa.me/905337498266?text=Merhabalar%20Kerim%20Bey%20Sipariş%20Vermek%20istiyorum."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium inline-flex items-center justify-center"
-            >
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
-              </svg>
-              WhatsApp ile Sor
-            </a>
-            <Link
-              href="/iletisim"
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium inline-flex items-center justify-center"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-              İletişim Sayfası
-            </Link>
-          </div>
-        </div>
-
-        {/* Related Links */}
-        <div className="mt-12">
-          <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">
-            İlgili Sayfalar
-          </h3>
-          <div className="grid md:grid-cols-3 gap-4">
-            <Link
-              href="/urunler"
-              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow text-center"
-            >
-              <div className="text-2xl mb-2">🧵</div>
-              <h4 className="font-semibold text-gray-900">Ürünlerimiz</h4>
-              <p className="text-sm text-gray-600">Atkı modellerimizi inceleyin</p>
-            </Link>
-            <Link
-              href="/blog"
-              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow text-center"
-            >
-              <div className="text-2xl mb-2">📝</div>
-              <h4 className="font-semibold text-gray-900">Blog</h4>
-              <p className="text-sm text-gray-600">Atkı rehberleri ve ipuçları</p>
-            </Link>
-            <Link
-              href="/hakkimizda"
-              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow text-center"
-            >
-              <div className="text-2xl mb-2">🏢</div>
-              <h4 className="font-semibold text-gray-900">Hakkımızda</h4>
-              <p className="text-sm text-gray-600">Atkigetir hikayesi</p>
-            </Link>
-          </div>
-        </div>
-      </main>
+      </div>
     </>
   );
 }

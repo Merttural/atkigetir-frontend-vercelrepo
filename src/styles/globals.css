@@ -2,9 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F8FAFC;
+  --foreground: #1A365D;
+  --font-geist-sans: 'Geist Sans', 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,10 +26,68 @@ html {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%);
+  color: #1A365D;
+  font-family: 'Inter', 'Plus Jakarta Sans', var(--font-geist-sans), system-ui, sans-serif;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  position: relative;
+}
+
+/* Grid Pattern - Kenarlarda */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(26, 54, 93, 0.02) 20px, rgba(26, 54, 93, 0.02) 21px),
+    repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(26, 54, 93, 0.02) 20px, rgba(26, 54, 93, 0.02) 21px);
+  pointer-events: none;
+  z-index: 0;
+  mask-image: 
+    linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
+  mask-composite: intersect;
+}
+
+/* Blur Blob'lar - Layout.js'de artık kullanılmıyor, orada daha kontrollü */
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Shimmer Effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  animation: shimmer 2s infinite;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Scrollbar Hide Utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
 }

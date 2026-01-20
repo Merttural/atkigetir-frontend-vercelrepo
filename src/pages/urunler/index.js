@@ -1,105 +1,234 @@
-import Head from "next/head";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import dynamic from 'next/dynamic';
 import ProductCard from '@/components/ProductCard';
-import { cachedApiCall } from '../../utils/cacheManager';
+import SidebarFilters from '@/components/SidebarFilters';
+import { ProductGridSkeleton } from '@/components/ProductCardSkeleton';
+import EmptyState from '@/components/EmptyState';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import SEO from '@/components/SEO';
+import { getSampleProducts } from '@/utils/supabaseProducts';
+import { useFilter } from '@/contexts/FilterContext';
+import { motion } from 'framer-motion';
+import { Search } from 'lucide-react';
 
-export default function UrunlerPage() {
-  const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("Tümü");
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+// Lazy load heavy components
+const ProcessTimeline = dynamic(() => import('@/components/ProcessTimeline'), {
+  ssr: true
+});
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        console.log('🔍 Fetching all products with cache...');
-        
-        const result = await cachedApiCall('/api/products');
-        
-        if (result.success && result.data.products) {
-          console.log(`✅ Products loaded: ${result.data.products.length} (${result.fromCache ? 'from cache' : 'from API'})`);
-          setProducts(result.data.products);
-        } else {
-          console.log('❌ Failed to load products');
-          setError("Ürünler yüklenemedi. Backend bağlantısı kurulamadı.");
-        }
-      } catch (error) {
-        console.error('❌ Products fetch error:', error);
-        setError("Ürünler yüklenemedi.");
-      } finally {
-        setLoading(false);
-      }
+const TrustSignals = dynamic(() => import('@/components/TrustSignals'), {
+  ssr: true
+});
+
+const TrustSection = dynamic(() => import('@/components/TrustSection'), {
+  ssr: true
+});
+
+const CompanyLocationMap = dynamic(() => import('@/components/CompanyLocationMap'), {
+  ssr: true
+});
+
+// Server-side data fetching with ISR
+export async function getStaticProps() {
+  try {
+    // Server-side Supabase client kullan
+    const { createServerAnonClient, isSupabaseReady } = await import('@/lib/supabase/server');
+    
+    // Supabase yapılandırılmamışsa sample products döndür
+    if (!isSupabaseReady()) {
+      return {
+        props: {
+          initialProducts: getSampleProducts()
+        },
+        revalidate: 60
+      };
+    }
+
+    // fetchAllProducts fonksiyonunu kullan (tüm kategorilerden ürünleri çeker)
+    const { fetchAllProducts } = await import('@/utils/supabaseProducts');
+    const products = await fetchAllProducts();
+
+    return {
+      props: {
+        initialProducts: products.length > 0 ? products : getSampleProducts()
+      },
+      revalidate: 60 // 60 saniyede bir yenile (ISR)
     };
+  } catch (error) {
+    console.error('getStaticProps error:', error);
+    return {
+      props: {
+        initialProducts: getSampleProducts()
+      },
+      revalidate: 60
+    };
+  }
+}
 
-    fetchProducts();
-  }, []);
-
-  const categories = ["Tümü", ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))];
-
-  const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategory === "Tümü" || product.category === selectedCategory;
-    const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase());
-    return matchesCategory && matchesSearch;
+export default function UrunlerPage({ initialProducts }) {
+  const [products, setProducts] = useState(initialProducts);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { selectedCategory, setSelectedCategory, searchTerm, setSearchTerm } = useFilter();
+  const [filters, setFilters] = useState({
+    productionType: [],
+    usage: []
   });
 
+  // Kategorileri memoize et
+  const categories = useMemo(() => {
+    return ["Tümü", ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))];
+  }, [products]);
+
+  // Kategori sayılarını hesapla
+  const categoryCounts = useMemo(() => {
+    const counts = { 'Tümü': products.length };
+    products.forEach(product => {
+      const category = product.category || 'Diğer';
+      counts[category] = (counts[category] || 0) + 1;
+    });
+    return counts;
+  }, [products]);
+
+  // Filtreleme mantığı - useMemo ile optimize et
+  const filteredProducts = useMemo(() => {
+    let filtered = [...products];
+
+    if (selectedCategory !== 'Tümü') {
+      filtered = filtered.filter(product => 
+        product.category && product.category.toLowerCase() === selectedCategory.toLowerCase()
+      );
+    }
+
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchLower) ||
+        (product.description && product.description.toLowerCase().includes(searchLower))
+      );
+    }
+
+    if (filters.productionType && filters.productionType.length > 0) {
+      filtered = filtered.filter(product => {
+        const desc = (product.description || '').toLowerCase();
+        return filters.productionType.some(type => 
+          desc.includes(type.toLowerCase())
+        );
+      });
+    }
+
+    if (filters.usage && filters.usage.length > 0) {
+      filtered = filtered.filter(product => {
+        const desc = (product.description || product.name || '').toLowerCase();
+        return filters.usage.some(usage => 
+          desc.includes(usage.toLowerCase())
+        );
+      });
+    }
+
+    return filtered;
+  }, [products, selectedCategory, searchTerm, filters]);
+
   return (
-    <main className="max-w-7xl mx-auto py-10 px-4">
-      <Head>
-        <title>Ürünler - Atkigetir</title>
-        <meta name="description" content="Atkı, bere, bayrak ve daha fazlası. Kişiye ve kuruma özel üretim ürünler Atkigetir'de!" />
-      </Head>
-      <h1 className="text-3xl font-bold mb-2">Tüm Ürünler</h1>
-      <p className="text-gray-500 mb-8">Atkı, bere, bayrak ve daha fazlası. Kişiye ve kuruma özel üretim!</p>
-      {/* Filtre ve arama alanı */}
-      <div className="sticky top-4 z-10 bg-white/80 backdrop-blur rounded-2xl shadow-md p-4 mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border border-gray-100">
-        {/* Kategori sekmeleri */}
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full border text-sm font-medium transition-all duration-200
-                ${selectedCategory === cat
-                  ? 'bg-gradient-to-r from-primary to-yellow-400 text-white border-primary shadow-md scale-105'
-                  : 'bg-white text-gray-700 border-gray-300 hover:bg-primary/10'}
-              `}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-        {/* Arama kutusu */}
-        <div className="relative w-full max-w-xs ml-auto">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-lg">🔍</span>
-          <input
-            type="text"
-            placeholder="Ürün adı ile ara..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 bg-white shadow focus:outline-none focus:ring-2 focus:ring-primary text-base transition"
-          />
+    <>
+      <SEO
+        title="Tüm Ürünler | Atkigetir - Atkı, Bere, Bayrak ve Daha Fazlası"
+        description="Atkı, bere, bayrak ve daha fazlası. Kişiye ve kuruma özel üretim ürünler Atkigetir'de! Hızlı kargo, güvenli alışveriş."
+        keywords="atkı, bere, bayrak, forma, taraftar ürünleri, özel üretim, toptan fiyat"
+        url="/urunler"
+      />
+      
+      <div className="min-h-screen relative">
+        <div className="max-w-[1920px] mx-auto px-6 md:px-8 lg:px-12 py-8 lg:py-12">
+          <Breadcrumbs items={[
+            { name: 'Anasayfa', href: '/' },
+            { name: 'Ürünler', href: '/urunler' }
+          ]} />
+          
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col lg:flex-row gap-8 lg:gap-10"
+          >
+            {/* Sol Sidebar - Filtreler ve Süreç */}
+            <div className="lg:w-80 xl:w-96 flex-shrink-0 space-y-6">
+              <SidebarFilters
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+                filters={filters}
+                onFilterChange={setFilters}
+                categoryCounts={categoryCounts}
+              />
+              {/* Süreç Nasıl İşler? */}
+              <ProcessTimeline />
+            </div>
+
+            {/* Orta Alan */}
+            <div className="flex-1">
+              {/* Başlık */}
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-[#0F172A] mb-2 tracking-tighter">Tüm Ürünler</h1>
+                <p className="text-slate-500">Atkı, bere, bayrak ve daha fazlası. Kişiye ve kuruma özel üretim!</p>
+              </div>
+
+              {/* Arama Barı */}
+              <div className="mb-6">
+                <div className="relative max-w-md">
+                  <input
+                    type="text"
+                    placeholder="Ürün adı ile ara..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] text-sm bg-white shadow-sm"
+                    aria-label="Ürün ara"
+                  />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" aria-hidden="true" />
+                </div>
+              </div>
+
+              {/* Sonuç Bilgisi */}
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-slate-600 text-sm">
+                  <span className="font-semibold text-[#0F172A]">{filteredProducts.length}</span> ürün bulundu
+                </p>
+              </div>
+
+              {/* Ürün Grid */}
+              {filteredProducts.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-8">
+                  {filteredProducts.map((product, index) => (
+                    <ProductCard
+                      key={`${product.id || product._id}-${product.slug || index}-${product.category || ''}`}
+                      product={product}
+                      showCategoryBadge={true}
+                      priority={index < 4}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  type="products"
+                  actionOnClick={() => {
+                    setSelectedCategory('Tümü');
+                    setSearchTerm('');
+                    setFilters({ productionType: [], usage: [] });
+                  }}
+                  actionLabel="Tüm Filtreleri Temizle"
+                />
+              )}
+            </div>
+
+            {/* Sağ Sidebar - Trust Signals, Company Location, Trust Section */}
+            <div className="hidden lg:block lg:w-80 xl:w-96 flex-shrink-0 space-y-6">
+              <TrustSignals />
+              <CompanyLocationMap />
+              <TrustSection />
+            </div>
+          </motion.div>
         </div>
       </div>
-      {/* Ürün grid'i */}
-      {error && <div className="text-red-600 mb-4">{error}</div>}
-      {loading ? (
-        <div>Yükleniyor...</div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <ProductCard key={product._id || product.slug} product={product} showCategoryBadge={true} />
-            ))
-          ) : (
-            <div className="col-span-full text-center text-gray-400 py-20">
-              <span>Ürün bulunamadı.</span>
-            </div>
-          )}
-        </div>
-      )}
-    </main>
+    </>
   );
 } 

@@ -21,8 +21,8 @@ export default function Document() {
         {/* Open Graph for social sharing */}
         <meta property="og:title" content="AtkıGetir" />
         <meta property="og:description" content="Kişiye ve firmaya özel şal, atkı ve bayrak üretimi." />
-        <meta property="og:image" content="/images/logo.svg" />
-        <meta property="og:url" content="https://www.atkigetir.com" />
+        <meta property="og:image" content="/images/atkigetirlogo.jpg" />
+        <meta property="og:url" content={process.env.NEXT_PUBLIC_BASE_URL || "https://www.atkigetir.com"} />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="AtkıGetir" />
 
@@ -30,43 +30,25 @@ export default function Document() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="AtkıGetir" />
         <meta name="twitter:description" content="Kişiye ve firmaya özel şal, atkı ve bayrak üretimi." />
-        <meta name="twitter:image" content="/images/logo.svg" />
+        <meta name="twitter:image" content="/images/atkigetirlogo.jpg" />
 
         {/* Favicon and Icons */}
-        <link rel="icon" href="/images/logo.svg" type="image/svg+xml" />
-        <link rel="icon" href="/images/logo.svg" sizes="any" />
-        <link rel="apple-touch-icon" href="/images/logo.svg" />
+        <link rel="icon" href="/images/atkigetirlogo.jpg" type="image/jpeg" />
+        <link rel="shortcut icon" href="/images/atkigetirlogo.jpg" type="image/jpeg" />
+        <link rel="apple-touch-icon" href="/images/atkigetirlogo.jpg" />
         <link rel="manifest" href="/manifest.json" />
         
-        {/* Preload critical resources */}
-        <link rel="preload" href="/images/logo.svg" as="image" type="image/svg+xml" />
+        {/* Logo preload kaldırıldı - Layout'ta priority ile yükleniyor */}
         
-        {/* Google Ads Tag */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-11457126126"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'AW-11457126126', {
-                'allow_enhanced_conversions': true
-              });
-              
-              // Remarketing için sayfa kategorisi
-              gtag('config', 'AW-11457126126', {
-                'custom_parameters': {
-                  'category': 'general'
-                }
-              });
-            `,
-          }}
-        />
+        {/* 
+          NOT: Google Ads ve diğer analytics scriptleri _app.js içinde
+          cookie consent kontrolü ile yükleniyor. Burada tekrar eklenmesine gerek yok.
+        */}
         
         {/* Additional SEO */}
         <meta name="robots" content="index, follow" />
         <meta name="googlebot" content="index, follow" />
-        <link rel="canonical" href="https://www.atkigetir.com" />
+        <link rel="canonical" href={process.env.NEXT_PUBLIC_BASE_URL || "https://www.atkigetir.com"} />
       </Head>
       <body className="bg-white text-black">
         <Main />

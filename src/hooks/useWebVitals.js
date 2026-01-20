@@ -14,10 +14,6 @@ export const useWebVitals = () => {
         });
       }
 
-      // Console'a log (development için)
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Web Vital:', metric);
-      }
     };
 
     // Web Vitals library'sini dinamik olarak yükle

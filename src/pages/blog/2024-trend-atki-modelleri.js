@@ -16,7 +16,7 @@ export default function TrendAtkiModelleri2024() {
           "@type": "BlogPosting",
           "headline": "2024'ün En Trend Atkı Modelleri",
           "description": "2024 yılında moda dünyasında öne çıkan atkı modelleri, renkleri ve tasarımları hakkında detaylı bilgiler.",
-          "image": "/images/atkiresim.jpg",
+          "image": "/images/bannergörsel2.jpg",
           "datePublished": "2024-01-15",
           "dateModified": "2024-01-15",
           "author": {
@@ -28,12 +28,12 @@ export default function TrendAtkiModelleri2024() {
             "name": "Atkigetir",
             "logo": {
               "@type": "ImageObject",
-              "url": "https://atkigetir.com/images/logo.svg"
+              "url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/images/logo.svg`
             }
           },
           "mainEntityOfPage": {
             "@type": "WebPage",
-            "@id": "https://atkigetir.com/blog/2024-trend-atki-modelleri"
+            "@id": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/blog/2024-trend-atki-modelleri`
           }
         }}
       />
@@ -87,7 +87,7 @@ export default function TrendAtkiModelleri2024() {
         {/* Featured Image */}
         <div className="relative w-full h-96 rounded-xl overflow-hidden mb-8">
           <Image
-            src="/images/atkiresim.jpg"
+            src="/images/atkıgörsel1.jpg"
             alt="2024 trend atkı modelleri"
             fill
             className="object-cover"

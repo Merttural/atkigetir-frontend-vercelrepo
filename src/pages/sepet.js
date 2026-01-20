@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
-import Head from 'next/head';
+import SEO from '@/components/SEO';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import DisabledFeatureModal from '@/components/DisabledFeatureModal';
+import EmptyState from '@/components/EmptyState';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useCart } from '@/hooks/useCart';
 import LoadingSpinner from '@/components/LoadingSpinner';
+import { ShoppingBag, Plus, Minus, Trash2, ArrowRight, MessageCircle, AlertCircle, Wrench } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function SepetPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showDisabledModal, setShowDisabledModal] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     name: '',
     surname: '',
@@ -28,80 +34,36 @@ export default function SepetPage() {
     clearCart 
   } = useCart();
 
-  const handlePayment = async () => {
-    if (cartItems.length === 0) {
-      if (typeof window !== 'undefined' && window.showToast) {
-        window.showToast('Sepetiniz boş!', 'error', 3000);
-      }
-      return;
-    }
-
-    setLoading(true);
-    console.log('🔄 Ödeme başlatılıyor...');
-
-    try {
-      console.log('📡 API isteği gönderiliyor...');
-      // GERÇEK İYZİCO ENTEGRASYONU
-      const response = await fetch('https://atkigetir-backend.onrender.com/api/payment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          cartItems,
-          customerInfo
-        }),
-      });
-
-      console.log('📡 API response status:', response.status);
-      const data = await response.json();
-      console.log('📡 API response data:', data);
-
-      if (response.ok && data.paymentUrl) {
-        console.log('✅ Ödeme URL\'si alındı, yönlendiriliyor...');
-        window.location.href = data.paymentUrl;
-      } else {
-        console.log('❌ Ödeme başlatılamadı:', data.error || 'Bilinmeyen hata');
-        if (typeof window !== 'undefined' && window.showToast) {
-          window.showToast(data.error || 'Ödeme başlatılamadı. Lütfen tekrar deneyin.', 'error', 5000);
-        }
-      }
-    } catch (error) {
-      console.log('❌ Network hatası:', error);
-      if (typeof window !== 'undefined' && window.showToast) {
-        window.showToast('Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.', 'error', 5000);
-      }
-    } finally {
-      setLoading(false);
-      console.log('🔄 Loading sonlandırıldı');
-    }
+  const handlePayment = () => {
+    setShowDisabledModal(true);
+  };
+  
+  const handleWhatsApp = () => {
+    const items = cartItems.map(item => `${item.name} (${item.quantity}x)`).join(', ');
+    const message = `Merhaba, sepetimdeki ürünler için fiyat almak istiyorum:\n${items}\n\nToplam: ${getTotalPrice().toFixed(2)} TL`;
+    
+    // Google Ads conversion tracking
+    googleAds.trackConversion();
+    
+    window.open(`https://wa.me/905337498266?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   };
 
   if (cartItems.length === 0) {
     return (
       <>
-        <Head>
-          <title>Sepet - Atkigetir</title>
-          <meta name="description" content="Sepetinizde ürün bulunmuyor. Atkigetir'de kaliteli atkı, bere ve aksesuar ürünlerini keşfedin." />
-          <meta name="keywords" content="sepet, alışveriş, atkı, bere, aksesuar" />
-          <meta property="og:title" content="Sepet - Atkigetir" />
-          <meta property="og:description" content="Sepetinizde ürün bulunmuyor. Atkigetir'de kaliteli ürünleri keşfedin." />
-          <meta property="og:url" content="https://atkigetir.com/sepet" />
-          <link rel="canonical" href="https://atkigetir.com/sepet" />
-        </Head>
-        <div className="min-h-screen bg-gray-50 py-12">
-          <div className="max-w-4xl mx-auto px-4">
-            <div className="text-center">
-              <div className="text-6xl mb-4">🛒</div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">Sepetiniz Boş</h1>
-              <p className="text-gray-600 mb-8">Henüz sepetinize ürün eklemediniz.</p>
-              <Link 
-                href="/urunler" 
-                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Ürünleri Keşfet
-              </Link>
-            </div>
+        <SEO
+          title="Sepet - Atkigetir"
+          description="Sepetinizde ürün bulunmuyor. Atkigetir'de kaliteli atkı, bere ve aksesuar ürünlerini keşfedin."
+          keywords="sepet, alışveriş, atkı, bere, aksesuar"
+          url="/sepet"
+        />
+        <div className="bg-[#F8FAFC] min-h-screen flex items-center justify-center py-12 px-4">
+          <div className="max-w-md mx-auto w-full">
+            <EmptyState
+              type="cart"
+              title="Sepetiniz Boş"
+              description="Henüz sepetinize ürün eklemediniz. Ürünleri keşfedin ve sepetinize ekleyin."
+            />
           </div>
         </div>
       </>
@@ -110,143 +72,217 @@ export default function SepetPage() {
 
   return (
     <>
-      <Head>
-        <title>Sepet ({cartItems.length} ürün) - Atkigetir</title>
-        <meta name="description" content={`Sepetinizde ${cartItems.length} ürün bulunuyor. Toplam: ${getTotalPrice().toFixed(2)} TL. Güvenli ödeme ile siparişinizi tamamlayın.`} />
-        <meta name="keywords" content="sepet, alışveriş, ödeme, atkı, bere, aksesuar" />
-        <meta property="og:title" content={`Sepet (${cartItems.length} ürün) - Atkigetir`} />
-        <meta property="og:description" content={`Sepetinizde ${cartItems.length} ürün bulunuyor. Toplam: ${getTotalPrice().toFixed(2)} TL.`} />
-        <meta property="og:url" content="https://atkigetir.com/sepet" />
-        <link rel="canonical" href="https://atkigetir.com/sepet" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "ShoppingCart",
-              "name": "Atkigetir Sepet",
-              "description": "Alışveriş sepeti",
-              "numberOfItems": cartItems.length,
-              "price": getTotalPrice().toFixed(2),
-              "priceCurrency": "TRY",
-              "url": "https://atkigetir.com/sepet"
-            })
-          }}
-        />
-      </Head>
+      <SEO
+        title={`Sepet (${cartItems.length} ürün) - Atkigetir`}
+        description={`Sepetinizde ${cartItems.length} ürün bulunuyor. Toplam: ${getTotalPrice().toFixed(2)} TL. Güvenli ödeme ile siparişinizi tamamlayın.`}
+        keywords="sepet, alışveriş, ödeme, atkı, bere, aksesuar"
+        url="/sepet"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "ShoppingCart",
+          "name": "Atkigetir Sepet",
+          "description": "Alışveriş sepeti",
+          "numberOfItems": cartItems.length,
+          "price": getTotalPrice().toFixed(2),
+          "priceCurrency": "TRY",
+          "url": "https://atkigetir.com/sepet"
+        }}
+      />
       
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-4xl mx-auto px-4">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Alışveriş Sepeti</h1>
+      <div className="bg-[#F8FAFC] min-h-screen py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <Breadcrumbs items={[
+            { name: 'Anasayfa', href: '/' },
+            { name: 'Sepet', href: '/sepet' }
+          ]} />
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Sepet Ürünleri */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold mb-6">Sepetinizdeki Ürünler</h2>
-                
-                <div className="space-y-4">
-                  {cartItems.map((item) => (
-                    <div key={item._id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 relative">
-                        <Image
-                          src={item.image || '/images/placeholder.jpg'}
-                          alt={item.name}
-                          fill
-                          className="object-cover rounded-lg"
-                          sizes="(max-width: 640px) 64px, 80px"
-                        />
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
-                        {item.category && (
-                          <p className="text-sm text-gray-500">{item.category}</p>
-                        )}
-                        {item.size && (
-                          <p className="text-sm text-blue-600 font-medium">Beden: {item.size}</p>
-                        )}
-                        <p className="text-lg font-bold text-blue-600">{item.price} TL</p>
-                      </div>
-                      
-                      <div className="flex flex-col items-end gap-2">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                            className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-600"
-                          >
-                            -
-                          </button>
-                          <span className="w-8 text-center font-medium">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                            className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-600"
-                          >
-                            +
-                          </button>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <h1 className="text-3xl font-bold text-[#0F172A] mb-6 tracking-tighter">Alışveriş Sepeti</h1>
+            
+            {/* Bakımda Banner */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="mb-6 p-5 bg-gradient-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-xl"
+            >
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0" aria-hidden="true">
+                  <Wrench className="w-6 h-6 text-yellow-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-[#0F172A] mb-1 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 text-yellow-600" aria-hidden="true" />
+                    Online Ödeme Geçici Olarak Bakımda
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed mb-3">
+                    Online ödeme sistemi şu anda bakım aşamasındadır. Sepetinizdeki ürünler için fiyat almak ve sipariş vermek için WhatsApp veya telefon ile iletişime geçebilirsiniz.
+                  </p>
+                  <motion.a
+                    href="https://wa.me/905337498266"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white py-2.5 px-4 rounded-lg font-semibold hover:from-[#16A34A] hover:to-[#15803d] transition-all shadow-md hover:shadow-[0_0_25px_rgba(34,197,94,0.4)] text-sm group"
+                    aria-label="WhatsApp üzerinden sipariş ver"
+                  >
+                    <MessageCircle className="w-4 h-4" aria-hidden="true" />
+                    <span>WhatsApp'tan Sipariş Ver</span>
+                    <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform duration-300" aria-hidden="true" />
+                  </motion.a>
+                </div>
+              </div>
+            </motion.div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Sepet Ürünleri */}
+              <div className="lg:col-span-2">
+                <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 p-6">
+                  <h2 className="text-xl font-semibold text-[#0F172A] mb-6 tracking-tight">Sepetinizdeki Ürünler</h2>
+                  
+                  <div className="space-y-4">
+                    {cartItems.map((item, index) => (
+                      <motion.div
+                        key={item._id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="flex items-center gap-4 p-4 border border-slate-200 rounded-xl hover:shadow-md transition-all"
+                      >
+                        <div className="w-20 h-20 flex-shrink-0 relative rounded-xl overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
+                          <Image
+                            src={item.image || '/images/placeholder.svg'}
+                            alt={item.name}
+                            fill
+                            className="object-cover"
+                            sizes="80px"
+                          />
                         </div>
                         
-                        <button
-                          onClick={() => removeFromCart(item._id)}
-                          className="text-red-500 hover:text-red-700 text-sm font-medium"
-                        >
-                          Kaldır
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <button
-                    onClick={clearCart}
-                    className="text-red-600 hover:text-red-800 font-medium"
-                  >
-                    Sepeti Temizle
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Ödeme Özeti */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4">
-                <h2 className="text-xl font-semibold mb-6">Ödeme Özeti</h2>
-                
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span>Ürün Sayısı:</span>
-                    <span className="font-medium">{cartItems.length}</span>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-[#0F172A] truncate mb-1">{item.name}</h3>
+                          {item.category && (
+                            <p className="text-xs text-slate-500 mb-1">{item.category}</p>
+                          )}
+                          {item.size && (
+                            <p className="text-xs text-[#2563EB] font-medium mb-2">Beden: {item.size}</p>
+                          )}
+                          <p className="text-lg font-bold bg-gradient-to-r from-[#2563EB] to-[#1e40af] bg-clip-text text-transparent">
+                            ₺{item.price}
+                          </p>
+                        </div>
+                        
+                        <div className="flex flex-col items-end gap-3">
+                          <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1" role="group" aria-label={`${item.name} miktarı`}>
+                            <motion.button
+                              onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              className="w-7 h-7 rounded-lg bg-white hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors"
+                              aria-label={`${item.name} miktarını azalt`}
+                            >
+                              <Minus className="w-4 h-4" aria-hidden="true" />
+                            </motion.button>
+                            <span className="w-8 text-center font-semibold text-[#0F172A]" aria-label={`Miktar: ${item.quantity}`}>{item.quantity}</span>
+                            <motion.button
+                              onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              className="w-7 h-7 rounded-lg bg-white hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors"
+                              aria-label={`${item.name} miktarını artır`}
+                            >
+                              <Plus className="w-4 h-4" aria-hidden="true" />
+                            </motion.button>
+                          </div>
+                          
+                          <motion.button
+                            onClick={() => removeFromCart(item._id)}
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="text-red-500 hover:text-red-700 text-sm font-medium flex items-center gap-1"
+                            aria-label={`${item.name} ürününü sepetten kaldır`}
+                          >
+                            <Trash2 className="w-4 h-4" aria-hidden="true" />
+                            <span>Kaldır</span>
+                          </motion.button>
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
                   
-                  <div className="flex justify-between">
-                    <span>Toplam:</span>
-                    <span className="font-bold text-xl text-blue-600">{getTotalPrice().toFixed(2)} TL</span>
+                  <div className="mt-6 pt-4 border-t border-slate-200">
+                    <motion.button
+                      onClick={clearCart}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="text-red-600 hover:text-red-800 font-medium flex items-center gap-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Sepeti Temizle</span>
+                    </motion.button>
                   </div>
                 </div>
-                
-                <button
-                  onClick={handlePayment}
-                  disabled={loading || cartItems.length === 0}
-                  className="w-full mt-6 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <LoadingSpinner size="sm" color="white" />
-                      <span>İşleniyor...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Ödemeye Geç</span>
-                      <span>→</span>
-                    </>
-                  )}
-                </button>
+              </div>
+              
+              {/* Ödeme Özeti */}
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-[24px] shadow-sm border border-slate-200 p-6 sticky top-4">
+                  <h2 className="text-xl font-semibold text-[#0F172A] mb-6 tracking-tight">Ödeme Özeti</h2>
+                  
+                  <div className="space-y-4 mb-6">
+                    <div className="flex justify-between text-slate-600">
+                      <span>Ürün Sayısı:</span>
+                      <span className="font-semibold text-[#0F172A]">{cartItems.length}</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-baseline pt-4 border-t border-slate-200">
+                      <span className="text-lg font-semibold text-[#0F172A]">Toplam:</span>
+                      <span className="text-2xl font-bold bg-gradient-to-r from-[#2563EB] to-[#1e40af] bg-clip-text text-transparent">
+                        ₺{getTotalPrice().toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <motion.button
+                      onClick={handlePayment}
+                      disabled={true}
+                      className="w-full bg-slate-300 text-slate-500 py-3.5 px-4 rounded-xl font-semibold cursor-not-allowed transition-all shadow-md flex items-center justify-center gap-2"
+                      aria-label="Ödeme yap (şu anda bakımda)"
+                      aria-disabled="true"
+                    >
+                      <Wrench className="w-5 h-5" aria-hidden="true" />
+                      <span>Bakımda - Ödeme Yapılamıyor</span>
+                    </motion.button>
+                    
+                    <motion.button
+                      onClick={handleWhatsApp}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full bg-gradient-to-r from-[#22C55E] to-[#16A34A] text-white py-3.5 px-4 rounded-xl font-semibold hover:from-[#16A34A] hover:to-[#15803d] transition-all shadow-md hover:shadow-[0_0_25px_rgba(34,197,94,0.4)] flex items-center justify-center gap-2 group"
+                      aria-label="WhatsApp üzerinden fiyat sor"
+                    >
+                      <MessageCircle className="w-5 h-5" aria-hidden="true" />
+                      <span>WhatsApp'tan Sor</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" aria-hidden="true" />
+                    </motion.button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
+      
+      <DisabledFeatureModal
+        isOpen={showDisabledModal}
+        onClose={() => setShowDisabledModal(false)}
+      />
     </>
   );
 } 

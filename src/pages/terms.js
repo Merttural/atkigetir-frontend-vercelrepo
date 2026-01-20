@@ -1,35 +1,66 @@
-import Head from 'next/head';
+import SEO from '@/components/SEO';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import Link from 'next/link';
+import { ArrowLeft, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function TermsPage() {
   return (
     <>
-      <Head>
-        <title>Kullanım Şartları - Atkigetir</title>
-        <meta name="description" content="Atkigetir kullanım şartları. Sipariş, ödeme, iade ve diğer tüm şartlar hakkında bilgi." />
-      </Head>
+      <SEO
+        title="Kullanım Şartları - Atkigetir"
+        description="Atkigetir kullanım şartları. Sipariş, ödeme, iade ve diğer tüm şartlar hakkında bilgi."
+        url="/terms"
+      />
       
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="bg-[#F8FAFC] min-h-screen py-6">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">Kullanım Şartları</h1>
-            <p className="text-gray-600 mb-6">Son güncelleme: {new Date().toLocaleDateString('tr-TR')}</p>
+          <Breadcrumbs items={[
+            { name: 'Anasayfa', href: '/' },
+            { name: 'Kullanım Şartları', href: '/terms' }
+          ]} />
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white rounded-[24px] shadow-sm border border-slate-200 p-8"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#1e40af] flex items-center justify-center">
+                <FileText className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-[#0F172A] tracking-tighter">Kullanım Şartları</h1>
+                <p className="text-slate-500 text-sm mt-1">Son güncelleme: {new Date().toLocaleDateString('tr-TR')}</p>
+              </div>
+            </div>
             
             <div className="prose prose-lg max-w-none">
-              <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-4">1. Genel Hükümler</h2>
-                <p className="text-gray-700 mb-4">
+              <motion.section
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="mb-8"
+              >
+                <h2 className="text-2xl font-semibold text-[#0F172A] mb-4 tracking-tight">1. Genel Hükümler</h2>
+                <p className="text-slate-600 mb-4 leading-relaxed">
                   Bu kullanım şartları, Atkigetir web sitesi üzerinden yapacağınız alışverişler için geçerlidir. 
                   Sitemizi kullanarak bu şartları kabul etmiş sayılırsınız.
                 </p>
-              </section>
+              </motion.section>
 
-              <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-4">2. Sipariş ve Ödeme</h2>
+              <motion.section
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="mb-8"
+              >
+                <h2 className="text-2xl font-semibold text-[#0F172A] mb-4 tracking-tight">2. Sipariş ve Ödeme</h2>
                 <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Sipariş Verme</h3>
-                    <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <div className="bg-slate-50 rounded-xl p-4">
+                    <h3 className="text-lg font-semibold text-[#0F172A] mb-3 tracking-tight">Sipariş Verme</h3>
+                    <ul className="list-disc list-inside text-slate-600 space-y-2 text-sm">
                       <li>Siparişleriniz 7/24 online olarak verilebilir</li>
                       <li>Stok durumu gerçek zamanlı olarak kontrol edilir</li>
                       <li>Ödeme onayından sonra sipariş işleme alınır</li>
@@ -37,16 +68,16 @@ export default function TermsPage() {
                     </ul>
                   </div>
                   
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Ödeme Yöntemleri</h3>
-                    <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <div className="bg-slate-50 rounded-xl p-4">
+                    <h3 className="text-lg font-semibold text-[#0F172A] mb-3 tracking-tight">Ödeme Yöntemleri</h3>
+                    <ul className="list-disc list-inside text-slate-600 space-y-2 text-sm">
                       <li>Kredi kartı (iyzico güvenlik sistemi)</li>
                       <li>Banka kartı</li>
                       <li>Havale/EFT (ön sipariş gerekli)</li>
                     </ul>
                   </div>
                 </div>
-              </section>
+              </motion.section>
 
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold text-gray-800 mb-4">3. Teslimat</h2>
@@ -179,17 +210,21 @@ export default function TermsPage() {
               </section>
             </div>
             
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <Link href="/" legacyBehavior>
-                <a className="inline-flex items-center text-blue-600 hover:text-blue-800 font-medium">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                  </svg>
-                  Ana Sayfaya Dön
-                </a>
-              </Link>
+            <div className="mt-8 pt-6 border-t border-slate-200">
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 text-[#2563EB] hover:text-[#1e40af] font-medium transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Ana Sayfaya Dön</span>
+                </Link>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </>

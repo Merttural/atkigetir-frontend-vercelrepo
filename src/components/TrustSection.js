@@ -1,51 +1,75 @@
-import { Factory, Users, Award } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Zap, Package, Building2, Truck } from 'lucide-react';
 
-const trustItems = [
-  {
-    icon: <Factory className="w-7 h-7 text-blue-400" />, badge: '3,000+ Günlük', badgeColor: 'bg-blue-600',
-    title: 'Yüksek Üretim Kapasitesi',
-    desc: "Günlük 3.000'den fazla atkı üretim kapasitemiz ile büyük siparişleri hızlı ve kaliteli şekilde teslim ediyoruz."
-  },
-  {
-    icon: <Users className="w-7 h-7 text-green-400" />, badge: '100% Özel', badgeColor: 'bg-green-600',
-    title: 'Kişiye Özel Üretim',
-    desc: 'Müşterilerimizin ihtiyaçlarına göre özel dokuma ve saten atkılar üretiyoruz.'
-  },
-  {
-    icon: <Award className="w-7 h-7 text-purple-400" />, badge: '25 Yıl', badgeColor: 'bg-purple-600',
-    title: 'Tecrübe ve Güven',
-    desc: '25 yıllık deneyimimizle sektörde güvenilir ve kaliteli üretim yapan bir firmayız.'
-  },
-];
-
+/**
+ * Trust Section - "Neden Biz?"
+ * Ürünlerin hemen üzerinde, kullanıcıyı ikna eden 15 saniyelik bilgilendirme
+ */
 export default function TrustSection() {
+  const trustItems = [
+    {
+      icon: Zap,
+      title: 'Hızlı Üretim',
+      description: 'Kısa sürede teslimat'
+    },
+    {
+      icon: Package,
+      title: 'Yüksek Kalite İplik',
+      description: 'Premium malzemeler'
+    },
+    {
+      icon: Building2,
+      title: 'Toptan ve Perakende',
+      description: 'Her miktara uygun fiyat'
+    },
+    {
+      icon: Truck,
+      title: "Türkiye'nin Her Yerine Kargo",
+      description: 'Ücretsiz kargo fırsatı'
+    }
+  ];
+
   return (
-    <section className="w-screen relative left-1/2 right-1/2 -mx-[50vw] bg-[#232b36] py-16">
-      <div className="max-w-5xl mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-3">Neden Bizi Tercih Ediyorlar?</h2>
-        <p className="text-gray-300 text-center mb-10 max-w-2xl mx-auto">
-          Sektördeki deneyimimiz ve kaliteli üretim anlayışımızla müşterilerimize en iyi hizmeti sunuyoruz.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {trustItems.map((item) => (
-            <div
-              key={item.title}
-              className="bg-[#232b36] rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 p-8 text-center border border-white/5"
-            >
-              <div className="flex justify-center mb-4">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center bg-white/5 mb-2">
-                  {item.icon}
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="mb-8"
+    >
+      <div className="bg-gray-50 rounded-2xl p-6 md:p-8 border-2 border-slate-800/20 shadow-lg">
+        <h2 className="text-xl md:text-2xl font-bold text-[#0F172A] mb-6 text-center tracking-tight">
+          Neden Biz?
+        </h2>
+        
+        {/* Dikey Layout - Alt Alta */}
+        <div className="grid grid-cols-1 gap-4 md:gap-6">
+          {trustItems.map((item, index) => {
+            const IconComponent = item.icon;
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.4 }}
+                whileHover={{ scale: 1.02 }}
+                className="flex flex-row items-center gap-4 p-4 md:p-6 rounded-xl bg-white hover:shadow-md transition-all border border-slate-800/10"
+              >
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-br from-[#2563EB] to-[#1e40af] flex items-center justify-center flex-shrink-0">
+                  <IconComponent className="w-6 h-6 md:w-7 md:h-7 text-white" />
                 </div>
-              </div>
-              <span className={`inline-block mb-3 px-3 py-1 rounded-full text-xs font-semibold text-white ${item.badgeColor}`}>
-                {item.badge}
-              </span>
-              <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-              <p className="text-gray-300 text-sm leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
+                <div className="flex-1">
+                  <h3 className="font-semibold text-[#0F172A] text-sm md:text-base mb-1">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs md:text-sm text-slate-600">
+                    {item.description}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

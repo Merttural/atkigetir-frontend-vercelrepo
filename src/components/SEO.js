@@ -1,5 +1,9 @@
 import Head from 'next/head';
 
+/**
+ * SEO Component - Optimize edilmiş meta tag ve structured data yönetimi
+ * Analytics scriptleri _app.js'de yönetiliyor
+ */
 export default function SEO({ 
   title, 
   description, 
@@ -13,13 +17,60 @@ export default function SEO({
 }) {
   const siteName = 'Atkigetir';
   const siteDescription = 'Türkiye\'nin en kaliteli atkı, bere, forma ve bayrak ürünleri. Kişiye özel tasarım, hızlı kargo, güvenli alışveriş.';
-  const baseUrl = 'https://atkigetir.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com';
   
-  const fullTitle = title ? `${title} - ${siteName}` : `${siteName} | Kaliteli Atkı ve Bere Ürünleri`;
+  const fullTitle = title ? `${title} | ${siteName}` : `${siteName} | Kaliteli Atkı ve Bere Ürünleri`;
   const fullDescription = description || siteDescription;
   const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
-  const fullImage = image ? `${baseUrl}${image}` : `${baseUrl}/images/logo.svg`;
+  const fullImage = image ? (image.startsWith('http') ? image : `${baseUrl}${image}`) : `${baseUrl}/images/logo.svg`;
   const canonicalUrl = canonical || fullUrl;
+
+  // Default Organization Structured Data
+  const defaultOrganizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": siteName,
+    "url": baseUrl,
+    "logo": `${baseUrl}/images/logo.svg`,
+    "description": siteDescription,
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "İstanbul",
+      "addressCountry": "TR"
+    },
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+90-533-749-82-66",
+      "contactType": "customer service",
+      "availableLanguage": ["Turkish"]
+    },
+    "sameAs": [
+      // Sosyal medya linkleriniz varsa buraya ekleyin
+    ]
+  };
+
+  // WebSite Schema with SearchAction
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": siteName,
+    "url": baseUrl,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": `${baseUrl}/urunler?search={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  // Structured data'yı birleştir
+  const allStructuredData = [
+    defaultOrganizationSchema,
+    websiteSchema,
+    ...(structuredData ? (Array.isArray(structuredData) ? structuredData : [structuredData]) : [])
+  ];
 
   return (
     <Head>
@@ -36,6 +87,10 @@ export default function SEO({
       <meta name="language" content="Turkish" />
       <meta name="geo.region" content="TR" />
       <meta name="geo.placename" content="İstanbul" />
+      
+      {/* Hreflang Tags */}
+      <link rel="alternate" hreflang="tr" href={fullUrl} />
+      <link rel="alternate" hreflang="x-default" href={fullUrl} />
       
       {/* Open Graph */}
       <meta property="og:title" content={fullTitle} />
@@ -59,84 +114,34 @@ export default function SEO({
       <meta name="twitter:creator" content="@atkigetir" />
       
       {/* Additional Meta Tags */}
-      <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <meta name="theme-color" content="#2563eb" />
-      <meta name="msapplication-TileColor" content="#2563eb" />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-      <meta name="apple-mobile-web-app-title" content={siteName} />
-      
-      {/* Performance Meta Tags */}
-      <meta name="format-detection" content="telephone=no" />
-      <meta name="mobile-web-app-capable" content="yes" />
-      <meta name="application-name" content={siteName} />
-      <meta name="msapplication-config" content="/browserconfig.xml" />
+      <meta name="theme-color" content="#2563EB" />
+      <meta name="msapplication-TileColor" content="#2563EB" />
       
       {/* Preload Critical Resources */}
-      <link rel="preload" href="/images/logo.svg" as="image" type="image/svg+xml" />
-      <link rel="preload" href="/_next/static/css/app.css" as="style" />
+      <link rel="preload" href="/images/atkigetirlogo.jpg" as="image" type="image/jpeg" />
       <link rel="dns-prefetch" href="//fonts.googleapis.com" />
       <link rel="dns-prefetch" href="//www.google-analytics.com" />
+      <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+      <link rel="dns-prefetch" href="//connect.facebook.net" />
       
-      {/* Structured Data */}
-      {structuredData && (
+      {/* Structured Data (JSON-LD) */}
+      {allStructuredData.map((data, index) => (
         <script
+          key={index}
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData)
+            __html: JSON.stringify(data, null, 0)
           }}
         />
-      )}
+      ))}
       
       {/* Favicon */}
-      <link rel="icon" href="/images/logo.svg" type="image/svg+xml" />
-      <link rel="icon" href="/images/logo.svg" sizes="any" />
-      <link rel="apple-touch-icon" href="/images/logo.svg" />
-      <link rel="manifest" href="/manifest.json" />
+      <link rel="icon" href="/images/atkigetirlogo.jpg" type="image/jpeg" />
+      <link rel="apple-touch-icon" href="/images/atkigetirlogo.jpg" />
       
       {/* Preconnect for Performance */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      
-      {/* Google Analytics */}
-      {process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID && (
-        <>
-          <script
-            async
-            src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}`}
-          />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}');
-              `,
-            }}
-          />
-        </>
-      )}
-      
-      {/* Facebook Pixel */}
-      {process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID && (
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              !function(f,b,e,v,n,t,s)
-              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-              n.queue=[];t=b.createElement(e);t.async=!0;
-              t.src=v;s=b.getElementsByTagName(e)[0];
-              s.parentNode.insertBefore(t,s)}(window, document,'script',
-              'https://connect.facebook.net/en_US/fbevents.js');
-              fbq('init', '${process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID}');
-              fbq('track', 'PageView');
-            `,
-          }}
-        />
-      )}
     </Head>
   );
-} 
+}

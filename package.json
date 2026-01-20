@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -17,10 +17,13 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
+    "@supabase/supabase-js": "^2.90.1",
     "@tailwindcss/line-clamp": "^0.4.4",
     "@tailwindcss/postcss": "^4.1.11",
     "critters": "^0.0.23",
     "formidable": "^3.5.4",
+    "framer-motion": "^12.26.2",
+    "geist": "^1.5.1",
     "imagekit": "^6.0.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.536.0",

@@ -17,17 +17,14 @@ class CacheManager {
 
     if (Date.now() > item.expiry) {
       this.cache.delete(key);
-      console.log(`⏰ Cache expired: ${key}`);
       return null;
     }
 
-    console.log(`✅ Cache hit: ${key}`);
     return item.data;
   }
 
   clear() {
     this.cache.clear();
-    console.log('🗑️ Cache cleared');
   }
 
   // Backend çalışmadığında mock data döndür
@@ -93,68 +90,10 @@ export const cachedApiCall = async (endpoint, fallbackData = null) => {
     return { success: true, data: cachedData, fromCache: true };
   }
 
-  // Cache'de yoksa API'yi retry ile dene - ÇOK AGRESİF
-  const maxRetries = 20; // 10'dan 20'ye çıkarıldı
-  const retryDelay = 500; // 1 saniyeden 0.5 saniyeye düşürüldü
-  
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      console.log(`🔍 Attempt ${attempt}/${maxRetries} - Trying backend...`);
-      
-      const baseUrls = [
-        // Backend'ler rate limit'te, geçici olarak devre dışı
-        // 'https://atkigetir-backend.onrender.com',
-        // 'https://api.atkigetir.com',
-        process.env.NEXT_PUBLIC_API_URL
-      ].filter(Boolean);
-
-      for (const baseUrl of baseUrls) {
-        try {
-          console.log(`🔍 Trying ${baseUrl}${endpoint}`);
-          const response = await fetch(`${baseUrl}${endpoint}`);
-          
-          if (response.ok) {
-            const data = await response.json();
-            console.log(`✅ API success: ${baseUrl}`);
-            
-            // Başarılı response'u cache'e kaydet
-            cacheManager.set(cacheKey, data);
-            
-            return { success: true, data, fromCache: false, url: baseUrl };
-          } else if (response.status === 429) {
-            console.log(`⚠️ Rate limit on ${baseUrl} (attempt ${attempt})`);
-            // Rate limit varsa biraz bekle ve tekrar dene
-            if (attempt < maxRetries) {
-              console.log(`⏳ Waiting ${retryDelay}ms before retry...`);
-              await new Promise(resolve => setTimeout(resolve, retryDelay));
-              continue;
-            }
-          } else {
-            console.log(`❌ Error ${response.status} on ${baseUrl}`);
-            continue;
-          }
-        } catch (error) {
-          console.log(`❌ Network error on ${baseUrl}:`, error.message);
-          continue;
-        }
-      }
-      
-      // Bu attempt'te başarısız, bir sonraki attempt için bekle
-      if (attempt < maxRetries) {
-        console.log(`⏳ Waiting ${retryDelay}ms before next attempt...`);
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
-      }
-      
-    } catch (error) {
-      console.error(`❌ Attempt ${attempt} failed:`, error);
-      if (attempt < maxRetries) {
-        console.log(`⏳ Waiting ${retryDelay}ms before retry...`);
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
-      }
-    }
+  // Backend API şu an aktif değil, fallback data döndür
+  if (fallbackData) {
+    return { success: true, data: fallbackData, fromCache: false };
   }
-
-  // Tüm retry'lar başarısız
-  console.log('❌ All retry attempts failed - Backend is not responding');
-  return { success: false, error: 'Backend is not responding after multiple attempts' };
+  
+  return { success: false, error: 'Backend API is not available' };
 };
