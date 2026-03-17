@@ -459,7 +459,9 @@ function Layout({ children }) {
       </footer>
 
       {/* Sticky WhatsApp Widget */}
-      <StickyWhatsApp />
+      <div className="hidden md:block">
+        <StickyWhatsApp />
+      </div>
 
       {/* Floating Quick Contact Buttons (Mobile) */}
       <FloatingQuickContact />

@@ -28,13 +28,24 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: '*.supabase.co',
-        pathname: '/storage/v1/object/public/**',
+        // public + signed + render-image endpoint'leri dahil
+        pathname: '/storage/v1/object/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/render/image/**',
       },
       // Supabase Storage (explicit project hostname)
       {
         protocol: 'https',
         hostname: 'jtdzlpzukfrpqwfvsrxf.supabase.co',
-        pathname: '/storage/v1/object/public/**',
+        pathname: '/storage/v1/object/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'jtdzlpzukfrpqwfvsrxf.supabase.co',
+        pathname: '/storage/v1/render/image/**',
       },
       // ImageKit
       {
