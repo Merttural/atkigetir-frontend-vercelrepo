@@ -30,6 +30,12 @@ const nextConfig = {
         hostname: '*.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      // Supabase Storage (explicit project hostname)
+      {
+        protocol: 'https',
+        hostname: 'jtdzlpzukfrpqwfvsrxf.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
       // ImageKit
       {
         protocol: 'https',
@@ -93,11 +99,12 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.google.com https://www.gstatic.com",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://www.google.com https://www.gstatic.com https://*.google-analytics.com",
+              "script-src-elem 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://www.google.com https://www.gstatic.com https://*.google-analytics.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
-              "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com https://*.imagekit.io",
+              "img-src 'self' data: blob: https: https://jtdzlpzukfrpqwfvsrxf.supabase.co https://www.googletagmanager.com https://*.google-analytics.com",
+              "connect-src 'self' https://*.supabase.co https://jtdzlpzukfrpqwfvsrxf.supabase.co https://www.google.com https://*.google-analytics.com https://www.googletagmanager.com https://*.imagekit.io",
               "frame-src 'self' https://www.google.com",
               "object-src 'none'",
               "base-uri 'self'",
