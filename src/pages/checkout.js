@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { ShoppingBag, ArrowRight, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { buildCartWhatsAppMessage } from '@/utils/whatsappProductMessage';
 
 export default function CheckoutPage() {
   const [cart, setCart] = useState([]);
@@ -39,8 +40,21 @@ export default function CheckoutPage() {
   };
   
   const handleWhatsApp = () => {
-    const items = cart.map(item => `${item.name} (${item.quantity}x)`).join(', ');
-    const message = `Merhaba, sipariş vermek istiyorum:\n\n${items}\n\nToplam: ₺${totalPrice}\n\nTeslimat Bilgileri:\nAd Soyad: ${form.name}\nEmail: ${form.email}\nTelefon: ${form.phone}\nAdres: ${form.address}\nŞehir: ${form.city}\nPosta Kodu: ${form.postal}`;
+    const cartPart = buildCartWhatsAppMessage(cart, totalPrice.toFixed(2), {
+      greetingLine: 'Merhaba, ödeme sayfasından sipariş vermek istiyorum.',
+      introLine: 'Sepetimdeki ürünler:',
+    });
+    const delivery = [
+      '',
+      'Teslimat bilgileri:',
+      `Ad Soyad: ${form.name}`,
+      `E-posta: ${form.email}`,
+      `Telefon: ${form.phone}`,
+      `Adres: ${form.address}`,
+      `Şehir: ${form.city}`,
+      `Posta kodu: ${form.postal}`,
+    ].join('\n');
+    const message = `${cartPart}${delivery}`;
     
     // Google Ads conversion tracking
     googleAds.trackConversion();

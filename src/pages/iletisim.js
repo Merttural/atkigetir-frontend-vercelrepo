@@ -1,7 +1,7 @@
 import { useState } from "react";
 import SEO from "@/components/SEO";
 import Breadcrumbs from '@/components/Breadcrumbs';
-import { MapPin, MessageCircle, Mail, Clock, Factory, Users, Send, ArrowRight, AlertCircle } from 'lucide-react';
+import { MapPin, MessageCircle, Mail, Clock, Factory, Users, Send, ArrowRight, AlertCircle, Facebook, Instagram } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { validateEmail, validatePhone, validateRequired, validateMinLength } from '@/utils/validation';
 
@@ -202,6 +202,8 @@ export default function IletisimPage() {
                   {[
                     { icon: MapPin, label: 'Adres', value: 'İstanbul, Türkiye', subValue: 'Türkiye geneli kargo', color: 'text-blue-500', bgColor: 'bg-blue-50' },
                     { icon: MessageCircle, label: 'WhatsApp', value: '0533 749 82 66', href: 'https://wa.me/905337498266?text=Merhabalar%20Kerim%20Bey%20Sipariş%20Vermek%20istiyorum.', color: 'text-[#22C55E]', bgColor: 'bg-emerald-50' },
+                    { icon: Facebook, label: 'Facebook', value: 'facebook.com/atkigetir', href: 'https://www.facebook.com/atkigetir/', color: 'text-[#1877F2]', bgColor: 'bg-sky-50' },
+                    { icon: Instagram, label: 'Instagram', value: '@atkigetir', href: 'https://www.instagram.com/atkigetir/', color: 'text-pink-600', bgColor: 'bg-pink-50' },
                     { icon: Mail, label: 'E-posta', value: 'info@atkigetir.com', href: 'mailto:info@atkigetir.com', color: 'text-purple-500', bgColor: 'bg-purple-50' },
                     { icon: Clock, label: 'Çalışma Saatleri', value: 'Pazartesi - Cuma: 09:00 - 18:00', subValue: 'Cumartesi: 09:00 - 17:00 | Pazar: Kapalı', color: 'text-orange-500', bgColor: 'bg-orange-50' }
                   ].map((item, index) => {

@@ -21,7 +21,7 @@ export default function AtkiSecimiRehberi() {
       "name": "Atkigetir",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://atkigetir.com/images/logo.svg"
+        "url": "https://atkigetir.com/images/atkigetir-logo.png"
       }
     },
     "description": "Doğru atkı seçimi için kapsamlı rehber. Malzeme, boyut, renk ve bakım önerileri ile mükemmel atkıyı bulun.",

@@ -28,7 +28,7 @@ export default function TrendAtkiModelleri2024() {
             "name": "Atkigetir",
             "logo": {
               "@type": "ImageObject",
-              "url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/images/logo.svg`
+              "url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/images/atkigetir-logo.png`
             }
           },
           "mainEntityOfPage": {

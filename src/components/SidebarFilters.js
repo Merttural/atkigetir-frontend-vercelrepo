@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, X, ChevronDown, Package, Flag, Shirt } from 'lucide-react';
+import { Filter, X, ChevronDown, Package, Flag, Shirt, Facebook, Instagram, MessageCircle } from 'lucide-react';
+
+const facebookUrl = 'https://www.facebook.com/atkigetir/';
+const instagramUrl = 'https://www.instagram.com/atkigetir/';
+const whatsappUrl = 'https://wa.me/905337498266';
 
 // Kategori ikonları mapping
 const categoryIcons = {
@@ -207,6 +211,41 @@ export default function SidebarFilters({
                   </motion.div>
                 )}
               </AnimatePresence>
+            </div>
+
+            <div className="mt-6 pt-5 border-t border-slate-200">
+              <p className="text-sm font-semibold text-[#0F172A] mb-3">
+                İletişim kanallarımız
+              </p>
+              <div className="flex gap-2" role="group" aria-label="Sosyal medya ve WhatsApp ile iletişim">
+                <a
+                  href={facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Atkigetir Facebook sayfası"
+                  className="flex flex-1 items-center justify-center min-h-[44px] rounded-xl border border-slate-200 bg-slate-50/80 text-[#1877F2] hover:bg-[#1877F2]/10 hover:border-[#1877F2]/40 transition-colors"
+                >
+                  <Facebook className="w-5 h-5" aria-hidden="true" />
+                </a>
+                <a
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Atkigetir Instagram sayfası"
+                  className="flex flex-1 items-center justify-center min-h-[44px] rounded-xl border border-slate-200 bg-slate-50/80 text-pink-600 hover:bg-pink-50 hover:border-pink-300 transition-colors"
+                >
+                  <Instagram className="w-5 h-5" aria-hidden="true" />
+                </a>
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="WhatsApp ile yazın"
+                  className="flex flex-1 items-center justify-center min-h-[44px] rounded-xl border border-emerald-200 bg-emerald-50/80 text-[#16A34A] hover:bg-emerald-100 hover:border-emerald-300 transition-colors"
+                >
+                  <MessageCircle className="w-5 h-5" aria-hidden="true" />
+                </a>
+              </div>
             </div>
           </motion.aside>
         )}

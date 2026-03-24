@@ -96,6 +96,28 @@ export const fetchAllProducts = async () => {
     // Homepage_order'a göre sırala
     allProducts.sort((a, b) => (a.orderRank || 0) - (b.orderRank || 0));
 
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🧾 fetchAllProducts result:', {
+        count: allProducts.length,
+        images: {
+          emptyOrPlaceholder: allProducts.filter(
+            (p) =>
+              !p?.image_url ||
+              p.image_url === '/images/placeholder.svg' ||
+              !p?.image ||
+              p.image === '/images/placeholder.svg'
+          ).length,
+        },
+        sample: allProducts.slice(0, 5).map((p) => ({
+          id: p?.id,
+          category: p?.category,
+          image_url: p?.image_url,
+          image: p?.image,
+          additionalImages: p?.additionalImages,
+        })),
+      });
+    }
+
     return allProducts;
   } catch (error) {
     console.error('❌ Error fetching all products:', error);

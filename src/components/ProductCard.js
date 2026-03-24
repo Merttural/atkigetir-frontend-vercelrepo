@@ -8,6 +8,7 @@ import ProductBadge, { getProductBadges } from './ProductBadge';
 import { getProductImageUrl, getProductImages } from '@/utils/imageUtils';
 import { useCart } from '@/hooks/useCart';
 import { trackAddToCart } from '@/utils/googleAds';
+import { buildProductCardWhatsAppMessage } from '@/utils/whatsappProductMessage';
 
 function ProductCard({ product, showCategoryBadge = false, priority = false, isFeatured = false, size = 'small' }) {
   const router = useRouter();
@@ -91,7 +92,13 @@ function ProductCard({ product, showCategoryBadge = false, priority = false, isF
   const handleWhatsApp = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const message = `Merhaba, "${productName}" ürünü hakkında bilgi almak istiyorum.`;
+
+    const message = buildProductCardWhatsAppMessage({
+      ...product,
+      name: productName,
+      slug: productSlug,
+      category: productCategory || undefined,
+    });
     
     // Google Ads conversion tracking
     googleAds.trackConversion();
@@ -236,7 +243,7 @@ function ProductCard({ product, showCategoryBadge = false, priority = false, isF
                     className={`object-cover transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                     priority={priority}
                     unoptimized={process.env.NODE_ENV === 'development'}
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    sizes="(max-width: 1024px) 50vw, 33vw"
                     onLoad={() => {
                       setImageLoading(false);
                       setImageError(false);

@@ -69,6 +69,19 @@ export default function ModernHomePage() {
         setError(null);
 
         const data = await fetchAllProducts();
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🧾 products (raw from fetchAllProducts):', data);
+          console.log(
+            '🖼️ products image fields sample:',
+            (data || []).slice(0, 10).map((p) => ({
+              id: p?.id,
+              category: p?.category,
+              image_url: p?.image_url,
+              image: p?.image,
+              additionalImages: p?.additionalImages,
+            }))
+          );
+        }
         
         let productsToUse = [];
         if (data && data.length > 0) {
@@ -239,7 +252,7 @@ export default function ModernHomePage() {
   if (loading) {
     return (
       <div className="py-12 bg-[#F8FAFC] min-h-screen">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="mb-8">
             <div className="h-10 bg-slate-200 rounded-lg w-64 mb-4 animate-pulse" />
             <div className="h-6 bg-slate-200 rounded-lg w-96 animate-pulse" />
@@ -252,7 +265,7 @@ export default function ModernHomePage() {
 
   return (
     <div className="min-h-screen relative">
-      <div className="max-w-[1920px] mx-auto px-6 md:px-8 lg:px-12 py-8 lg:py-12">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 lg:py-12">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -281,16 +294,31 @@ export default function ModernHomePage() {
             {/* Hero Section */}
             <Hero />
 
-            {/* Sonuç Bilgisi */}
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-gray-600 text-sm">
-                <span className="font-semibold text-gray-900">{filteredProducts.length}</span> ürün gösteriliyor
-                {allProducts.length > displayedProducts.length && (
-                  <span className="text-gray-500 ml-2">
-                    (Toplam {allProducts.length} ürün)
-                  </span>
-                )}
+            {/* Toplam ürün — sabit vurgu, büyük sayı */}
+            <div className="mb-6 flex flex-col gap-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Toplam ürün
               </p>
+              <p className="flex flex-wrap items-baseline gap-2">
+                <span className="text-4xl md:text-5xl font-extrabold text-[#0F172A] tabular-nums leading-none tracking-tight">
+                  {allProducts.length}
+                </span>
+                <span className="text-base md:text-lg font-semibold text-slate-600">
+                  ürün
+                </span>
+              </p>
+              {(selectedCategory !== 'Tümü' ||
+                Boolean(searchTerm?.trim()) ||
+                (filters.productionType?.length ?? 0) > 0 ||
+                (filters.usage?.length ?? 0) > 0) && (
+                <p className="text-sm text-slate-500 mt-1">
+                  Seçili filtrelere göre bu sayfada{' '}
+                  <span className="font-semibold text-slate-700 tabular-nums">
+                    {filteredProducts.length}
+                  </span>{' '}
+                  ürün listeleniyor.
+                </p>
+              )}
             </div>
 
             {/* Ürün Grid */}
@@ -305,7 +333,7 @@ export default function ModernHomePage() {
 
             {filteredProducts.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-8">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-3 lg:gap-8 mb-8">
                   {filteredProducts.map((product, index) => (
                     <ProductCard
                       key={`${product.id || product._id}-${product.slug || index}-${product.category || ''}`}

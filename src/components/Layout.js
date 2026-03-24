@@ -2,7 +2,7 @@ import { useState, useEffect, memo } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Search, MessageCircle, Phone, Menu, X, ArrowRight, ShoppingBag, LogIn, UserPlus } from 'lucide-react';
+import { Search, MessageCircle, Phone, Menu, X, ArrowRight, ShoppingBag, LogIn, UserPlus, Facebook, Instagram } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchModal from './SearchModal';
 import { useCart } from '@/hooks/useCart';
@@ -29,6 +29,8 @@ function Layout({ children }) {
 
   const whatsappNumber = '905337498266';
   const phoneNumber = '+90-533-749-82-66';
+  const facebookUrl = 'https://www.facebook.com/atkigetir/';
+  const instagramUrl = 'https://www.instagram.com/atkigetir/';
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -80,11 +82,11 @@ function Layout({ children }) {
             <Link href="/" className="flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Image
-                  src="/images/atkigetirlogo.jpg"
-                  alt="Atkigetir"
-                  width={40}
-                  height={40}
-                  className="w-10 h-10"
+                  src="/images/atkigetir-logo.png"
+                  alt="Atkıgetir"
+                  width={44}
+                  height={44}
+                  className="w-11 h-11 rounded-2xl object-contain shrink-0"
                   priority
                   unoptimized={process.env.NODE_ENV === 'development'}
                 />
@@ -156,6 +158,32 @@ function Layout({ children }) {
                 </Link>
               </motion.div>
 
+              {/* Facebook & Instagram - Desktop */}
+              <div className="hidden md:flex items-center gap-0.5 border-l border-slate-200 pl-3 ml-1">
+                <motion.a
+                  href={facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook'ta Atkigetir"
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2 rounded-lg text-slate-600 hover:text-[#1877F2] hover:bg-slate-100 transition-colors"
+                >
+                  <Facebook className="w-5 h-5" aria-hidden="true" />
+                </motion.a>
+                <motion.a
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram'da Atkigetir"
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-2 rounded-lg text-slate-600 hover:text-pink-600 hover:bg-pink-50 transition-colors"
+                >
+                  <Instagram className="w-5 h-5" aria-hidden="true" />
+                </motion.a>
+              </div>
+
               {/* WhatsApp Button */}
               <motion.a
                 href={`https://wa.me/${whatsappNumber}`}
@@ -182,6 +210,26 @@ function Layout({ children }) {
                 <Phone className="w-5 h-5" aria-hidden="true" />
                 <span className="text-sm font-medium">{phoneNumber}</span>
               </motion.a>
+
+              {/* Facebook & Instagram - Mobil üst bar */}
+              <a
+                href={facebookUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook'ta Atkigetir"
+                className="md:hidden p-2 text-slate-600 hover:text-[#1877F2] transition-colors rounded-lg hover:bg-slate-100"
+              >
+                <Facebook className="w-5 h-5" aria-hidden="true" />
+              </a>
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram'da Atkigetir"
+                className="md:hidden p-2 text-slate-600 hover:text-pink-600 transition-colors rounded-lg hover:bg-pink-50/80"
+              >
+                <Instagram className="w-5 h-5" aria-hidden="true" />
+              </a>
 
               {/* Mobile Search Toggle - Modal açıcı */}
               <button
@@ -319,6 +367,26 @@ function Layout({ children }) {
                     <Phone className="w-4 h-4" />
                     <span>{phoneNumber}</span>
                   </a>
+                  <div className="flex items-center gap-3 px-4 pt-2">
+                    <a
+                      href={facebookUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 flex-1 py-2.5 rounded-lg border border-slate-200 text-[#1877F2] font-medium text-sm hover:bg-sky-50 transition-colors"
+                    >
+                      <Facebook className="w-5 h-5" aria-hidden="true" />
+                      Facebook
+                    </a>
+                    <a
+                      href={instagramUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 flex-1 py-2.5 rounded-lg border border-slate-200 text-pink-600 font-medium text-sm hover:bg-pink-50 transition-colors"
+                    >
+                      <Instagram className="w-5 h-5" aria-hidden="true" />
+                      Instagram
+                    </a>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -342,11 +410,11 @@ function Layout({ children }) {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Image
-                  src="/images/atkigetirlogo.jpg"
-                  alt="Atkigetir"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8"
+                  src="/images/atkigetir-logo.png"
+                  alt="Atkıgetir"
+                  width={40}
+                  height={40}
+                  className="w-10 h-10 rounded-2xl object-contain shrink-0"
                   unoptimized={process.env.NODE_ENV === 'development'}
                 />
                 <span className="text-lg font-bold">Atkigetir</span>
@@ -354,6 +422,26 @@ function Layout({ children }) {
               <p className="text-slate-400 text-sm mb-4">
                 Türkiye'nin önde gelen taraftar atkısı ve bayrak üreticisi. Özel üretim, toptan fiyat, hızlı teslimat.
               </p>
+              <div className="flex items-center gap-3">
+                <a
+                  href={facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Atkigetir Facebook sayfası"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 text-slate-300 hover:bg-[#1877F2] hover:text-white transition-colors"
+                >
+                  <Facebook className="w-5 h-5" aria-hidden="true" />
+                </a>
+                <a
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Atkigetir Instagram sayfası"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 text-slate-300 hover:bg-gradient-to-br hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] hover:text-white transition-colors"
+                >
+                  <Instagram className="w-5 h-5" aria-hidden="true" />
+                </a>
+              </div>
             </div>
 
             {/* Quick Links */}

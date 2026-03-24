@@ -11,6 +11,7 @@ import ProductCard from '@/components/ProductCard';
 import { trackViewItem, trackAddToCart } from "@/utils/googleAds";
 import { fetchProductBySlug, fetchRandomProducts } from "@/utils/supabaseProducts";
 import { getProductImageUrl, getProductImages } from "@/utils/imageUtils";
+import { buildProductDetailWhatsAppMessage } from "@/utils/whatsappProductMessage";
 import { MessageCircle, ShoppingCart, CheckCircle2, Truck, Award, Factory, ArrowRight, Ruler, Layers, Palette, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -184,7 +185,7 @@ export default function ProductDetail({ product: initialProduct }) {
   };
   
   const handleWhatsApp = () => {
-    const message = `Merhaba, ${product.name} için fiyat almak istiyorum.`;
+    const message = buildProductDetailWhatsAppMessage(product);
     
     // Google Ads conversion tracking
     googleAds.trackConversion();
@@ -570,7 +571,7 @@ export default function ProductDetail({ product: initialProduct }) {
                   Bu {product.category?.toLowerCase()} ürününü beğendiyseniz, aşağıdaki ürünlerle takım yapabilirsiniz.
                 </p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-3 lg:gap-8">
                 {similarProducts.map((similarProduct, index) => (
                   <ProductCard
                     key={similarProduct.id || similarProduct._id}

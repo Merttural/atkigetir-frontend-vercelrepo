@@ -10,6 +10,7 @@ import { useCart } from '@/hooks/useCart';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import { ShoppingBag, Plus, Minus, Trash2, ArrowRight, MessageCircle, AlertCircle, Wrench } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { buildCartWhatsAppMessage } from '@/utils/whatsappProductMessage';
 
 export default function SepetPage() {
   const router = useRouter();
@@ -39,8 +40,7 @@ export default function SepetPage() {
   };
   
   const handleWhatsApp = () => {
-    const items = cartItems.map(item => `${item.name} (${item.quantity}x)`).join(', ');
-    const message = `Merhaba, sepetimdeki ürünler için fiyat almak istiyorum:\n${items}\n\nToplam: ${getTotalPrice().toFixed(2)} TL`;
+    const message = buildCartWhatsAppMessage(cartItems, getTotalPrice().toFixed(2));
     
     // Google Ads conversion tracking
     googleAds.trackConversion();

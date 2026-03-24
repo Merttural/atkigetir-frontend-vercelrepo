@@ -120,9 +120,9 @@ export default function App({ Component, pageProps }) {
           <meta name="msapplication-TileColor" content="#2563EB" />
           <meta name="msapplication-config" content="/browserconfig.xml" />
           <link rel="manifest" href="/manifest.json" />
-          <link rel="icon" href="/images/atkigetirlogo.jpg" type="image/jpeg" />
-          <link rel="apple-touch-icon" href="/images/atkigetirlogo.jpg" />
-          <link rel="icon" type="image/jpeg" sizes="any" href="/images/atkigetirlogo.jpg" />
+          <link rel="icon" href="/images/atkigetir-logo.png" type="image/png" />
+          <link rel="apple-touch-icon" href="/images/atkigetir-logo.png" />
+          <link rel="icon" type="image/png" sizes="any" href="/images/atkigetir-logo.png" />
         </Head>
 
         {/* Google Tag Manager - Cookie consent kontrolü ile */}

@@ -22,7 +22,7 @@ export default function SEO({
   const fullTitle = title ? `${title} | ${siteName}` : `${siteName} | Kaliteli Atkı ve Bere Ürünleri`;
   const fullDescription = description || siteDescription;
   const fullUrl = url ? `${baseUrl}${url}` : baseUrl;
-  const fullImage = image ? (image.startsWith('http') ? image : `${baseUrl}${image}`) : `${baseUrl}/images/logo.svg`;
+  const fullImage = image ? (image.startsWith('http') ? image : `${baseUrl}${image}`) : `${baseUrl}/images/atkigetir-logo.png`;
   const canonicalUrl = canonical || fullUrl;
 
   // Default Organization Structured Data
@@ -31,7 +31,7 @@ export default function SEO({
     "@type": "Organization",
     "name": siteName,
     "url": baseUrl,
-    "logo": `${baseUrl}/images/logo.svg`,
+    "logo": `${baseUrl}/images/atkigetir-logo.png`,
     "description": siteDescription,
     "address": {
       "@type": "PostalAddress",
@@ -118,7 +118,7 @@ export default function SEO({
       <meta name="msapplication-TileColor" content="#2563EB" />
       
       {/* Preload Critical Resources */}
-      <link rel="preload" href="/images/atkigetirlogo.jpg" as="image" type="image/jpeg" />
+      <link rel="preload" href="/images/atkigetir-logo.png" as="image" type="image/png" />
       <link rel="dns-prefetch" href="//fonts.googleapis.com" />
       <link rel="dns-prefetch" href="//www.google-analytics.com" />
       <link rel="dns-prefetch" href="//www.googletagmanager.com" />
@@ -136,8 +136,8 @@ export default function SEO({
       ))}
       
       {/* Favicon */}
-      <link rel="icon" href="/images/atkigetirlogo.jpg" type="image/jpeg" />
-      <link rel="apple-touch-icon" href="/images/atkigetirlogo.jpg" />
+      <link rel="icon" href="/images/atkigetir-logo.png" type="image/png" />
+      <link rel="apple-touch-icon" href="/images/atkigetir-logo.png" />
       
       {/* Preconnect for Performance */}
       <link rel="preconnect" href="https://fonts.googleapis.com" />

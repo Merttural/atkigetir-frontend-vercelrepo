@@ -139,7 +139,7 @@ export default function UrunlerPage({ initialProducts }) {
       />
       
       <div className="min-h-screen relative">
-        <div className="max-w-[1920px] mx-auto px-6 md:px-8 lg:px-12 py-8 lg:py-12">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 lg:py-12">
           <Breadcrumbs items={[
             { name: 'Anasayfa', href: '/' },
             { name: 'Ürünler', href: '/urunler' }
@@ -197,7 +197,7 @@ export default function UrunlerPage({ initialProducts }) {
 
               {/* Ürün Grid */}
               {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-8">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-3 lg:gap-8 mb-8">
                   {filteredProducts.map((product, index) => (
                     <ProductCard
                       key={`${product.id || product._id}-${product.slug || index}-${product.category || ''}`}

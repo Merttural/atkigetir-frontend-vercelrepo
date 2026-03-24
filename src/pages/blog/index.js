@@ -177,7 +177,7 @@ export default function BlogPage() {
               "name": "Atkigetir",
               "logo": {
                 "@type": "ImageObject",
-                "url": `${baseUrl}/images/logo.svg`,
+                "url": `${baseUrl}/images/atkigetir-logo.png`,
                 "width": 512,
                 "height": 512
               }
@@ -211,7 +211,7 @@ export default function BlogPage() {
                   "name": "Atkigetir",
                   "logo": {
                     "@type": "ImageObject",
-                    "url": `${baseUrl}/images/logo.svg`
+                    "url": `${baseUrl}/images/atkigetir-logo.png`
                   }
                 },
                 "articleSection": post.category,

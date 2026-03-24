@@ -21,7 +21,7 @@ export default function Document() {
         {/* Open Graph for social sharing */}
         <meta property="og:title" content="AtkıGetir" />
         <meta property="og:description" content="Kişiye ve firmaya özel şal, atkı ve bayrak üretimi." />
-        <meta property="og:image" content="/images/atkigetirlogo.jpg" />
+        <meta property="og:image" content="/images/atkigetir-logo.png" />
         <meta property="og:url" content={process.env.NEXT_PUBLIC_BASE_URL || "https://www.atkigetir.com"} />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="AtkıGetir" />
@@ -30,12 +30,12 @@ export default function Document() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="AtkıGetir" />
         <meta name="twitter:description" content="Kişiye ve firmaya özel şal, atkı ve bayrak üretimi." />
-        <meta name="twitter:image" content="/images/atkigetirlogo.jpg" />
+        <meta name="twitter:image" content="/images/atkigetir-logo.png" />
 
         {/* Favicon and Icons */}
-        <link rel="icon" href="/images/atkigetirlogo.jpg" type="image/jpeg" />
-        <link rel="shortcut icon" href="/images/atkigetirlogo.jpg" type="image/jpeg" />
-        <link rel="apple-touch-icon" href="/images/atkigetirlogo.jpg" />
+        <link rel="icon" href="/images/atkigetir-logo.png" type="image/png" />
+        <link rel="shortcut icon" href="/images/atkigetir-logo.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/images/atkigetir-logo.png" />
         <link rel="manifest" href="/manifest.json" />
         
         {/* Logo preload kaldırıldı - Layout'ta priority ile yükleniyor */}

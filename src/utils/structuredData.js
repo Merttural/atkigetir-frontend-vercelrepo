@@ -13,7 +13,7 @@ export function getHomePageStructuredData() {
       "@type": "Organization",
       "name": "Atkigetir",
       "url": baseUrl,
-      "logo": `${baseUrl}/images/logo.svg`,
+      "logo": `${baseUrl}/images/atkigetir-logo.png`,
       "description": "Türkiye'nin önde gelen taraftar atkısı ve bayrak üreticisi. Özel üretim, toptan fiyat, hızlı teslimat.",
       "foundingDate": "1999",
       "contactPoint": {
@@ -24,9 +24,8 @@ export function getHomePageStructuredData() {
         "availableLanguage": ["Turkish"]
       },
       "sameAs": [
-        "https://www.facebook.com/atkigetir",
-        "https://www.instagram.com/atkigetir",
-        "https://twitter.com/atkigetir"
+        "https://www.facebook.com/atkigetir/",
+        "https://www.instagram.com/atkigetir/"
       ],
       "address": {
         "@type": "PostalAddress",
@@ -41,7 +40,7 @@ export function getHomePageStructuredData() {
       "@type": "LocalBusiness",
       "@id": `${baseUrl}/#organization`,
       "name": "Atkigetir",
-      "image": `${baseUrl}/images/logo.svg`,
+      "image": `${baseUrl}/images/atkigetir-logo.png`,
       "url": baseUrl,
       "telephone": "+90-533-749-82-66",
       "priceRange": "$$",

@@ -24,42 +24,46 @@ export default function MiniBanner() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-r from-[#2563EB] to-[#1e40af] rounded-[24px] p-6 mb-6 text-white shadow-md"
+      className="bg-gradient-to-r from-[#2563EB] to-[#1e40af] rounded-2xl sm:rounded-[24px] p-4 sm:p-6 mb-5 sm:mb-6 text-white shadow-md"
     >
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex-1">
-          <h2 className="text-xl font-bold mb-2">Özel üretim taraftar atkısı & bayrak</h2>
-          <p className="text-blue-100 text-sm">
-            Toptan fiyat için WhatsApp'tan yazın
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex-1 text-center md:text-left">
+          <h2 className="text-lg sm:text-xl font-bold mb-1.5 sm:mb-2 leading-snug">
+            Özel üretim taraftar atkısı &amp; bayrak
+          </h2>
+          <p className="text-blue-100 text-xs sm:text-sm leading-relaxed">
+            Toptan fiyat için WhatsApp&apos;tan yazın
           </p>
         </div>
         
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row flex-wrap sm:flex-nowrap gap-2 sm:gap-3 w-full md:w-auto md:justify-end">
           <motion.button
+            type="button"
             onClick={handleWhatsApp}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-white text-[#2563EB] px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-colors shadow-md hover:shadow-lg flex items-center gap-2 group"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="bg-white text-[#2563EB] px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl font-semibold hover:bg-blue-50 transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2 group text-sm sm:text-base w-full sm:w-auto"
           >
-            <MessageCircle className="w-5 h-5" />
-            <span>WhatsApp'tan Yaz</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+            <MessageCircle className="w-5 h-5 shrink-0" />
+            <span className="whitespace-nowrap">WhatsApp&apos;tan Yaz</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300 shrink-0 hidden sm:block" />
           </motion.button>
           
           <motion.button
+            type="button"
             onClick={handlePhone}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 px-6 py-3 rounded-xl font-semibold hover:bg-white/20 transition-colors flex items-center gap-2"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl font-semibold hover:bg-white/20 transition-colors flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
           >
-            <Phone className="w-5 h-5" />
-            <span>Telefonla Ara</span>
+            <Phone className="w-5 h-5 shrink-0" />
+            <span className="whitespace-nowrap">Telefonla Ara</span>
           </motion.button>
         </div>
       </div>
 
       {/* Güven Rozetleri */}
-      <div className="mt-4 pt-4 border-t border-white/20 flex flex-wrap items-center gap-4 text-xs text-blue-100">
+      <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/20 flex flex-wrap items-center justify-center md:justify-start gap-x-4 gap-y-2 text-[11px] sm:text-xs text-blue-100">
         <span>✓ Hızlı Teslimat</span>
         <span>✓ Yerli Üretim</span>
         <span>✓ Kaliteli Malzeme</span>

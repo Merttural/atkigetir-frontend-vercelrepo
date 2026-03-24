@@ -28,6 +28,15 @@ export function getProductImageUrl(imageUrl) {
     // Supabase yapılandırılmamışsa relative path'i döndür
     return imageUrl.startsWith('/') ? imageUrl : `/${imageUrl}`;
   }
+
+  // Eğer Supabase public object path'i geldiyse (host olmadan), direkt prefixle
+  // Örn: /storage/v1/object/public/bucket/file.jpg
+  if (imageUrl.startsWith('/storage/v1/object/public/')) {
+    return `${supabaseUrl}${imageUrl}`;
+  }
+  if (imageUrl.startsWith('storage/v1/object/public/')) {
+    return `${supabaseUrl}/${imageUrl}`;
+  }
   
   // Supabase Storage path formatlarını kontrol et
   // Format 1: storage/bucket-name/file-path.jpg veya /storage/bucket-name/file-path.jpg
