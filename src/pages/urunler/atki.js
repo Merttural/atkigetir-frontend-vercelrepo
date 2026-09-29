@@ -5,11 +5,11 @@ export default function AtkiPage() {
     <CategoryPageTemplate
       categoryName="atkı"
       categorySlug="atki"
-      seoTitle="Atkı Modelleri ve Fiyatları 2024 | En Kaliteli Atkılar - Atkigetir"
-      seoDescription="2024'ün en kaliteli atkı modelleri! Kişiye özel tasarım atkılar, şal atkılar, dokuma atkılar ve kışlık atkı modelleri. Hızlı kargo, güvenli alışveriş, uygun fiyatlar."
-      seoKeywords="atkı, atkı modelleri, atkı fiyatları, kışlık atkı, şal atkı, dokuma atkı, kişiye özel atkı, kaliteli atkı, ucuz atkı, erkek atkı, kadın atkı"
-      pageTitle="Atkı Modelleri ve Fiyatları 2024"
-      pageDescription="En kaliteli atkı modelleri Atkigetir'de! Kişiye özel tasarım atkılar, şal atkılar ve kışlık atkı modelleri."
+      seoTitle="Atkı Modelleri ve Fiyatları 2026"
+      seoDescription="2026 kış sezonu atkı modelleri: taraftar atkısı, kişiye özel tasarım, şal atkı ve dokuma atkı. Özel üretim, toptan fiyat, hızlı kargo."
+      seoKeywords="atkı, atkı modelleri, atkı fiyatları, kışlık atkı, şal atkı, dokuma atkı, kişiye özel atkı, taraftar atkısı, kaliteli atkı, erkek atkı, kadın atkı"
+      pageTitle="Atkı Modelleri ve Fiyatları 2026"
+      pageDescription="2026 kış sezonunun atkı modelleri Atkigetir'de. Taraftar atkısı, kişiye özel tasarım, şal atkı ve dokuma atkı."
     />
   );
 }

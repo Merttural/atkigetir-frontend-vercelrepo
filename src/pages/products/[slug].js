@@ -193,6 +193,10 @@ export default function ProductDetail({ product: initialProduct }) {
     window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   };
 
+  const priceValidUntil = new Date();
+  priceValidUntil.setFullYear(priceValidUntil.getFullYear() + 1);
+  const priceValidUntilDate = priceValidUntil.toISOString().slice(0, 10);
+
   if (loading) {
     return (
       <div className="bg-[#F8FAFC] min-h-screen flex items-center justify-center">
@@ -249,7 +253,7 @@ export default function ProductDetail({ product: initialProduct }) {
               "@type": "Offer",
               "priceCurrency": "TRY",
               "price": product.price || 0,
-              "priceValidUntil": "2025-12-31",
+              "priceValidUntil": priceValidUntilDate,
               "availability": (product.stock || 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
               "url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/urunler/${product.slug || product._id || product.id}`,
               "seller": {

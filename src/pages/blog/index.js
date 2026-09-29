@@ -14,6 +14,32 @@ export default function BlogPage() {
     // Blog yazıları listesi
     const blogPosts = [
       {
+        id: 11,
+        title: "2026 Kış Sezonu Atkı Rehberi",
+        slug: "2026-kis-sezonu-atki-rehberi",
+        excerpt: "2026-2027 kış sezonunda atkı seçerken ölçü, kumaş ve kullanım yerine göre nelere bakılacağını anlatan güncel rehber.",
+        image: "/images/atkıgörsel1.jpg",
+        date: "2026-09-29",
+        datePublished: "2026-09-29T12:00:00+03:00",
+        dateModified: "2026-09-29T12:00:00+03:00",
+        category: "Sezon",
+        readTime: "6 dk",
+        featured: true
+      },
+      {
+        id: 12,
+        title: "Taraftar Atkısı Nasıl Seçilir?",
+        slug: "taraftar-atkisi-secimi",
+        excerpt: "Maç, deplasman ve toptan sipariş için taraftar atkısında renk, ölçü, dokuma ve adet seçimini anlatan rehber.",
+        image: "/images/atkıgörsel2.jpg",
+        date: "2026-09-29",
+        datePublished: "2026-09-29T12:00:00+03:00",
+        dateModified: "2026-09-29T12:00:00+03:00",
+        category: "Taraftar",
+        readTime: "5 dk",
+        featured: true
+      },
+      {
         id: 1,
         title: "2024'ün En Trend Atkı Modelleri",
         slug: "2024-trend-atki-modelleri",
@@ -24,7 +50,7 @@ export default function BlogPage() {
         dateModified: "2024-01-15T10:00:00+03:00",
         category: "Moda",
         readTime: "5 dk",
-        featured: true
+        featured: false
       },
       {
         id: 2,
@@ -154,8 +180,8 @@ export default function BlogPage() {
   return (
     <>
       <SEO
-        title="Atkı Blog - Moda, Stil ve Bakım Rehberi | Atkigetir"
-        description="Atkı modelleri, stil önerileri, bakım rehberleri ve moda trendleri hakkında uzman içerikler. 2024'ün en güncel atkı rehberi."
+        title="Atkı Blog - Moda, Stil ve Bakım Rehberi"
+        description="Atkı modelleri, taraftar atkısı seçimi, stil önerileri ve bakım rehberleri. 2026 kış sezonunun güncel atkı içerikleri."
         keywords="atkı blog, atkı modelleri, atkı rehberi, atkı bakımı, atkı kullanımı, kış modası, atkı trendleri"
         url="/blog"
         type="blog"

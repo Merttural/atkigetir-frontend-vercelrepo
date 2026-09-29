@@ -7,11 +7,11 @@ export default function AtkiSecimiRehberi() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "headline": "Atkı Seçiminde Dikkat Edilmesi Gerekenler - 2024 Rehberi",
+    "headline": "Atkı Seçiminde Dikkat Edilmesi Gerekenler",
     "image": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/images/atkıgörsel2.jpg`,
     "url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/blog/atki-seciminde-dikkat-edilecekler`,
     "datePublished": "2024-01-20T08:00:00+08:00",
-    "dateModified": "2024-01-20T09:00:00+08:00",
+    "dateModified": "2026-09-29T12:00:00+03:00",
     "author": {
       "@type": "Organization",
       "name": "Atkigetir"
@@ -34,7 +34,7 @@ export default function AtkiSecimiRehberi() {
   return (
     <>
       <SEO
-        title="Atkı Seçiminde Dikkat Edilmesi Gerekenler | 2024 Rehberi - Atkigetir"
+        title="Atkı Seçiminde Dikkat Edilmesi Gerekenler"
         description="Doğru atkı seçimi için kapsamlı rehber. Malzeme, boyut, renk ve bakım önerileri ile mükemmel atkıyı bulun. Atkigetir uzman tavsiyeleri."
         keywords="atkı seçimi, atkı rehberi, doğru atkı, atkı malzemesi, atkı boyutu, atkı bakımı, atkı kombinasyonu, kışlık atkı seçimi"
         image="/images/blog/atki-secimi.jpg"
@@ -181,9 +181,9 @@ export default function AtkiSecimiRehberi() {
         <div className="mt-16 bg-gray-50 rounded-lg p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">İlgili Makaleler</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            <Link href="/blog/2024-trend-atki-modelleri" className="block bg-white rounded-lg p-4 hover:shadow-md transition-shadow">
-              <h3 className="font-semibold text-gray-900 mb-2">2024'ün En Trend Atkı Modelleri</h3>
-              <p className="text-gray-600 text-sm">Bu yılın en popüler atkı modelleri ve kombin önerileri...</p>
+            <Link href="/blog/2026-kis-sezonu-atki-rehberi" className="block bg-white rounded-lg p-4 hover:shadow-md transition-shadow">
+              <h3 className="font-semibold text-gray-900 mb-2">2026 Kış Sezonu Atkı Rehberi</h3>
+              <p className="text-gray-600 text-sm">Bu sezon atkı seçerken ölçü, kumaş ve kullanım yerine göre nelere bakılacağı...</p>
             </Link>
             <Link href="/urunler/atki" className="block bg-white rounded-lg p-4 hover:shadow-md transition-shadow">
               <h3 className="font-semibold text-gray-900 mb-2">Atkı Modelleri</h3>

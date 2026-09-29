@@ -97,6 +97,76 @@ function generateSiteMap(products) {
        <changefreq>monthly</changefreq>
        <priority>0.8</priority>
      </url>
+
+     <url>
+       <loc>${baseUrl}/blog/2026-kis-sezonu-atki-rehberi</loc>
+       <lastmod>${currentDate}</lastmod>
+       <changefreq>monthly</changefreq>
+       <priority>0.8</priority>
+     </url>
+
+     <url>
+       <loc>${baseUrl}/blog/taraftar-atkisi-secimi</loc>
+       <lastmod>${currentDate}</lastmod>
+       <changefreq>monthly</changefreq>
+       <priority>0.8</priority>
+     </url>
+
+     <url>
+       <loc>${baseUrl}/blog/kis-aylarinda-atki-kullanimi</loc>
+       <lastmod>${currentDate}</lastmod>
+       <changefreq>monthly</changefreq>
+       <priority>0.6</priority>
+     </url>
+
+     <url>
+       <loc>${baseUrl}/blog/atki-bakimi-ve-temizligi</loc>
+       <lastmod>${currentDate}</lastmod>
+       <changefreq>monthly</changefreq>
+       <priority>0.6</priority>
+     </url>
+
+     <url>
+       <loc>${baseUrl}/blog/taraftar-atkisi-tasarim-trendleri</loc>
+       <lastmod>${currentDate}</lastmod>
+       <changefreq>monthly</changefreq>
+       <priority>0.6</priority>
+     </url>
+
+     <url>
+       <loc>${baseUrl}/blog/kurumsal-atki-uretim-rehberi</loc>
+       <lastmod>${currentDate}</lastmod>
+       <changefreq>monthly</changefreq>
+       <priority>0.6</priority>
+     </url>
+
+     <url>
+       <loc>${baseUrl}/blog/bere-modelleri-secim-rehberi</loc>
+       <lastmod>${currentDate}</lastmod>
+       <changefreq>monthly</changefreq>
+       <priority>0.6</priority>
+     </url>
+
+     <url>
+       <loc>${baseUrl}/blog/bayrak-uretim-kullanim-alanlari</loc>
+       <lastmod>${currentDate}</lastmod>
+       <changefreq>monthly</changefreq>
+       <priority>0.6</priority>
+     </url>
+
+     <url>
+       <loc>${baseUrl}/blog/toplan-atki-siparisi-avantajlar</loc>
+       <lastmod>${currentDate}</lastmod>
+       <changefreq>monthly</changefreq>
+       <priority>0.6</priority>
+     </url>
+
+     <url>
+       <loc>${baseUrl}/blog/ozel-tasarim-atki-uretim</loc>
+       <lastmod>${currentDate}</lastmod>
+       <changefreq>monthly</changefreq>
+       <priority>0.6</priority>
+     </url>
      
      <!-- Newsletter ve Partnerlik -->
      <url>
