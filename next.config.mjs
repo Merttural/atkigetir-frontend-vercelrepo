@@ -20,9 +20,9 @@ const nextConfig = {
   
   // Images configuration
   images: {
-    // Development'da unoptimized kullan (Supabase Storage sorunlarını önlemek için)
-    // Production'da optimize et
-    unoptimized: process.env.NODE_ENV === 'development',
+    // Vercel görsel optimizasyonu kotası dolunca /_next/image 402 döner ve kutu boş kalır.
+    // Dosyalar doğrudan Supabase ve /images altından yüklensin.
+    unoptimized: true,
     remotePatterns: [
       // Supabase Storage
       {
