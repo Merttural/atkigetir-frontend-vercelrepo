@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Phone, Sparkles, MessageCircle, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import { LICENSE_NOTICE } from '@/utils/licenseNotice';
 
 /**
  * Hero Section - Giriş Alanı
@@ -125,7 +125,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-[1.45rem] leading-snug sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white mb-2 sm:mb-5 md:mb-6 tracking-tight px-1"
+            className="text-[1.45rem] leading-snug sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-bold text-white mb-2 sm:mb-4 tracking-tight px-1"
           >
             Firmanıza Özel Atkı ve Bere Üretimi
           </motion.h1>
@@ -135,9 +135,18 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-xs sm:text-base md:text-lg lg:text-xl text-white/85 mb-4 sm:mb-8 md:mb-10 leading-relaxed max-w-2xl mx-auto px-1"
+            className="text-xs sm:text-base md:text-lg text-white/85 mb-2 sm:mb-4 leading-relaxed max-w-2xl mx-auto px-1"
           >
             Yüksek kalite, uygun fiyat ve hızlı teslimat avantajıyla hayalinizdeki tasarımı gerçeğe dönüştürüyoruz.
+          </motion.p>
+
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45, duration: 0.6 }}
+            className="text-[11px] sm:text-sm text-white leading-snug mb-3 sm:mb-5 max-w-3xl mx-auto px-3 py-1.5 rounded-xl bg-black/45"
+          >
+            {LICENSE_NOTICE}
           </motion.p>
 
           {/* CTA Butonları */}
