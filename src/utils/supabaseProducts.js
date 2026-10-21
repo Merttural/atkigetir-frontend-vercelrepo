@@ -13,6 +13,21 @@ const CATEGORY_TABLES = {
   'Forma': 'forma'
 };
 
+const isRemovedProduct = (item, tableName) => {
+  if (!item) return false;
+  if (tableName === 'bayrak' && Number(item.id) === 9) return true;
+
+  const text = [item.model_adi, item.model_açıklaması, item.resim_url, item.resim_1, item.resim_2]
+    .filter((value) => typeof value === 'string')
+    .join(' ')
+    .toLocaleLowerCase('tr-TR');
+
+  return text.includes('konya');
+};
+
+const hideRemovedProducts = (items, tableName) =>
+  (items || []).filter((item) => !isRemovedProduct(item, tableName));
+
 // Atkı tablosu için mapping (resim_1, resim_2 kullanıyor)
 const mapAtkiFromSupabase = (item, category = 'Atkı') => {
   const slug = `${category.toLowerCase()}-${item.id}`;
@@ -69,22 +84,28 @@ export const fetchAllProducts = async () => {
     // Her kategoriden ürünleri çek
     for (const [category, tableName] of Object.entries(CATEGORY_TABLES)) {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from(tableName)
           .select('*')
+          .not('model_adi', 'ilike', '%konya%')
           .order('homepage_order', { ascending: true, nullsFirst: false });
+
+        if (tableName === 'bayrak') query = query.neq('id', 9);
+
+        const { data, error } = await query;
 
         if (error) {
           // Error fetching category - continue with other categories
           continue; // Bu kategoriyi atla, diğerlerini çekmeye devam et
         }
 
-        if (data && data.length > 0) {
+        const visible = hideRemovedProducts(data, tableName);
+        if (visible.length > 0) {
           // Atkı tablosu için özel mapping
           if (tableName === 'atkilar') {
-            allProducts.push(...data.map(item => mapAtkiFromSupabase(item, category)));
+            allProducts.push(...visible.map(item => mapAtkiFromSupabase(item, category)));
           } else {
-            allProducts.push(...data.map(item => mapProductFromSupabase(item, category)));
+            allProducts.push(...visible.map(item => mapProductFromSupabase(item, category)));
           }
         }
       } catch (err) {
@@ -138,20 +159,26 @@ export const fetchProductsByCategory = async (category) => {
   }
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from(tableName)
       .select('*')
+      .not('model_adi', 'ilike', '%konya%')
       .order('homepage_order', { ascending: true, nullsFirst: false });
+
+    if (tableName === 'bayrak') query = query.neq('id', 9);
+
+    const { data, error } = await query;
 
     if (error) {
       console.error(`❌ Error fetching ${category}:`, error);
       return [];
     }
 
+    const visible = hideRemovedProducts(data, tableName);
     if (tableName === 'atkilar') {
-      return data?.map(item => mapAtkiFromSupabase(item, category)) || [];
+      return visible.map(item => mapAtkiFromSupabase(item, category));
     } else {
-      return data?.map(item => mapProductFromSupabase(item, category)) || [];
+      return visible.map(item => mapProductFromSupabase(item, category));
     }
   } catch (error) {
     console.error(`Error fetching products by category (${category}):`, error);
@@ -170,9 +197,12 @@ export const getCategoryCounts = async () => {
     
     for (const [category, tableName] of Object.entries(CATEGORY_TABLES)) {
       try {
-        const { count, error } = await supabase
+        let countQuery = supabase
           .from(tableName)
-          .select('*', { count: 'exact', head: true });
+          .select('*', { count: 'exact', head: true })
+          .not('model_adi', 'ilike', '%konya%');
+        if (tableName === 'bayrak') countQuery = countQuery.neq('id', 9);
+        const { count, error } = await countQuery;
 
         if (!error && count !== null) {
           counts[category] = count || 0;
@@ -224,19 +254,24 @@ export const fetchFeaturedProducts = async (limit = 8) => {
     // Her kategoriden featured ürünleri çek
     for (const [category, tableName] of Object.entries(CATEGORY_TABLES)) {
       try {
-        const { data, error } = await supabase
+        let featuredQuery = supabase
           .from(tableName)
           .select('*')
           .eq('featured', true)
+          .not('model_adi', 'ilike', '%konya%')
           .order('homepage_order', { ascending: true, nullsFirst: false });
+        if (tableName === 'bayrak') featuredQuery = featuredQuery.neq('id', 9);
+
+        const { data, error } = await featuredQuery;
 
         if (error) continue;
 
-        if (data && data.length > 0) {
+        const visible = hideRemovedProducts(data, tableName);
+        if (visible.length > 0) {
           if (tableName === 'atkilar') {
-            allProducts.push(...data.map(item => mapAtkiFromSupabase(item, category)));
+            allProducts.push(...visible.map(item => mapAtkiFromSupabase(item, category)));
           } else {
-            allProducts.push(...data.map(item => mapProductFromSupabase(item, category)));
+            allProducts.push(...visible.map(item => mapProductFromSupabase(item, category)));
           }
         }
       } catch (err) {
@@ -281,7 +316,7 @@ export const fetchProductBySlug = async (slug) => {
     }
 
     const id = parseInt(parts[parts.length - 1]);
-    if (isNaN(id)) {
+    if (isNaN(id) || (tableName === 'bayrak' && id === 9)) {
       return null;
     }
 
@@ -291,7 +326,7 @@ export const fetchProductBySlug = async (slug) => {
       .eq('id', id)
       .single();
 
-    if (error || !data) {
+    if (error || !data || isRemovedProduct(data, tableName)) {
       return null;
     }
 
