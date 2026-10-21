@@ -4,11 +4,17 @@ import Link from "next/link";
 import { ChevronDown, Plus, Minus, MessageCircle, Mail, HelpCircle, Package, FileText, Building2, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
+import { LICENSE_NOTICE_LONG } from '@/utils/licenseNotice';
 
 export default function FAQPage() {
   const [openFaq, setOpenFaq] = useState(null);
 
   const faqData = [
+    {
+      id: 11,
+      question: "Kulüp logolu veya lisanslı ürün yaptırabilir miyim?",
+      answer: LICENSE_NOTICE_LONG
+    },
     {
       id: 9,
       question: "Toplu sipariş indirimi var mı?",
@@ -27,7 +33,7 @@ export default function FAQPage() {
     {
       id: 3,
       question: "Kişiye özel atkı tasarımı yapıyor musunuz?",
-      answer: "Evet! İstediğiniz renk, desen, boyut ve yazı ile özel atkı tasarımı yapıyoruz. WhatsApp hattımızdan bizimle iletişime geçerek tasarım detaylarınızı paylaşabilirsiniz."
+      answer: "Evet! İstediğiniz renk, desen, boyut ve yazı ile özel atkı tasarımı yapıyoruz. Kulüp arması, ismi ve lisanslı tasarımlar yalnızca kulüp izni varsa faturalı olarak üretilir. WhatsApp hattımızdan bizimle iletişime geçerek tasarım detaylarınızı paylaşabilirsiniz."
     },
     {
       id: 4,

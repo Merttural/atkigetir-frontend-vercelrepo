@@ -158,7 +158,7 @@ export default function SearchModal({ isOpen, onClose, onSearch }) {
                       {searchResults.map((result) => (
                         <Link
                           key={result.id}
-                          href={`/urunler/${result.slug}`}
+                          href={`/products/${result.slug}`}
                           onClick={onClose}
                           className="block p-3 hover:bg-slate-50 rounded-lg transition-colors"
                           aria-label={`${result.name} ürün detaylarını görüntüle`}

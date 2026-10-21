@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { Search, MessageCircle, Phone, Menu, X, ArrowRight, ShoppingBag, LogIn, UserPlus, Facebook, Instagram } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchModal from './SearchModal';
+import LicenseNotice from './LicenseNotice';
+import { LICENSE_NOTICE_LONG } from '@/utils/licenseNotice';
 import { useCart } from '@/hooks/useCart';
 
 // Lazy load heavy components
@@ -76,6 +78,7 @@ function Layout({ children }) {
       
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm relative z-10">
+        <LicenseNotice />
         <div className="max-w-[1920px] mx-auto px-6 md:px-8 lg:px-12">
           <div className="flex items-center justify-between h-20 gap-4">
             {/* Logo */}
@@ -541,6 +544,9 @@ function Layout({ children }) {
           </div>
 
           <div className="mt-8 pt-8 border-t border-slate-800 text-center text-sm text-slate-400">
+            <p className="max-w-3xl mx-auto mb-3 text-xs leading-relaxed text-slate-400">
+              {LICENSE_NOTICE_LONG}
+            </p>
             <p>&copy; {new Date().getFullYear()} Atkigetir. Tüm hakları saklıdır.</p>
           </div>
         </div>

@@ -52,7 +52,7 @@ function generateSiteMap(products) {
      </url>
      
      ${products.map((product) => {
-       const productUrl = `${baseUrl}/urunler/${product.slug || product.id}`;
+       const productUrl = `${baseUrl}/products/${product.slug || product.id}`;
        const imageUrl = product.image_url || product.image || '';
        const fullImageUrl = imageUrl.startsWith('http') 
          ? imageUrl 

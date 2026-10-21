@@ -4,6 +4,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import { MapPin, MessageCircle, Mail, Clock, Factory, Users, Send, ArrowRight, AlertCircle, Facebook, Instagram } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { validateEmail, validatePhone, validateRequired, validateMinLength } from '@/utils/validation';
+import { LICENSE_NOTICE_LONG } from '@/utils/licenseNotice';
 
 export default function IletisimPage() {
   const [form, setForm] = useState({
@@ -166,6 +167,9 @@ export default function IletisimPage() {
               <h1 className="text-4xl font-bold text-[#0F172A] mb-4 tracking-tighter">İletişim</h1>
               <p className="text-slate-500 text-lg max-w-2xl mx-auto leading-relaxed">
                 İstanbul merkezli atkı mağazamızdan kaliteli ürünler sipariş edin. WhatsApp ile hızlı iletişim!
+              </p>
+              <p className="mt-6 mx-auto max-w-3xl rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950">
+                {LICENSE_NOTICE_LONG}
               </p>
             </motion.div>
 

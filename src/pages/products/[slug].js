@@ -12,6 +12,7 @@ import { trackViewItem, trackAddToCart } from "@/utils/googleAds";
 import { fetchProductBySlug, fetchRandomProducts } from "@/utils/supabaseProducts";
 import { getProductImageUrl, getProductImages } from "@/utils/imageUtils";
 import { buildProductDetailWhatsAppMessage } from "@/utils/whatsappProductMessage";
+import LicenseNotice from '@/components/LicenseNotice';
 import { MessageCircle, ShoppingCart, CheckCircle2, Truck, Award, Factory, ArrowRight, Ruler, Layers, Palette, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -196,6 +197,15 @@ export default function ProductDetail({ product: initialProduct }) {
   const priceValidUntil = new Date();
   priceValidUntil.setFullYear(priceValidUntil.getFullYear() + 1);
   const priceValidUntilDate = priceValidUntil.toISOString().slice(0, 10);
+  const categoryKey = String(product?.category || '').toLocaleLowerCase('tr-TR');
+  const categorySlug = {
+    'atkı': 'atki',
+    atki: 'atki',
+    bayrak: 'bayrak',
+    bere: 'bere',
+    forma: 'forma',
+  }[categoryKey];
+  const categoryHref = categorySlug ? `/urunler/${categorySlug}` : '/urunler';
 
   if (loading) {
     return (
@@ -227,7 +237,7 @@ export default function ProductDetail({ product: initialProduct }) {
         description={`${product.name} - ${product.category} kategorisinde kaliteli ürün. ${product.description ? product.description.substring(0, 120) : 'Kişiye özel tasarım, hızlı kargo, güvenli alışveriş. İstanbul merkezli üretim.'} Ücretsiz kargo fırsatı!`}
         keywords={`${product.name}, ${product.category}, ${product.category} fiyatları, kaliteli ${product.category.toLowerCase()}, kişiye özel tasarım, istanbul ${product.category.toLowerCase()}, ${product.category.toLowerCase()} siparişi, ${product.category.toLowerCase()} modelleri, ucuz ${product.category.toLowerCase()}, ${product.category.toLowerCase()} üreticisi`}
         image={allImages[0] || getProductImageUrl(product.image_url || product.image)}
-        url={`/urunler/${product.slug || product._id}`}
+        url={`/products/${product.slug || product._id}`}
         type="product"
         structuredData={[
           {
@@ -255,7 +265,7 @@ export default function ProductDetail({ product: initialProduct }) {
               "price": product.price || 0,
               "priceValidUntil": priceValidUntilDate,
               "availability": (product.stock || 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-              "url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/urunler/${product.slug || product._id || product.id}`,
+              "url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/products/${product.slug || product._id || product.id}`,
               "seller": {
                 "@type": "Organization",
                 "name": "Atkigetir",
@@ -357,8 +367,8 @@ export default function ProductDetail({ product: initialProduct }) {
           <Breadcrumbs items={[
             { name: 'Anasayfa', href: '/' },
             { name: 'Ürünler', href: '/urunler' },
-            { name: product.category || 'Ürün', href: product.category ? `/urunler/${product.category.toLowerCase()}` : '/urunler' },
-            { name: product.name, href: `/urunler/${product.slug || product._id}` }
+            { name: product.category || 'Ürün', href: categoryHref },
+            { name: product.name, href: `/products/${product.slug || product._id}` }
           ]} />
           
           <motion.div
@@ -524,6 +534,9 @@ export default function ProductDetail({ product: initialProduct }) {
                   <span className="w-2 h-2 bg-[#22C55E] rounded-full animate-pulse"></span>
                   <span>Genelde 5 dakikada cevap veriyoruz</span>
                 </p>
+                <div className="mt-4">
+                  <LicenseNotice variant="compact" />
+                </div>
               </motion.div>
               
               {/* Teknik Detaylar - Minimalist */}
@@ -683,7 +696,7 @@ export default function ProductDetail({ product: initialProduct }) {
             <div className="grid md:grid-cols-3 gap-4">
               {[
                 { href: '/urunler', title: 'Tüm Ürünler', desc: 'Geniş ürün koleksiyonumuzu keşfedin' },
-                { href: product.category ? `/urunler/${product.category.toLowerCase()}` : '/urunler', title: `${product.category || 'Ürün'} Kategorisi`, desc: 'Benzer ürünleri inceleyin' },
+                { href: categoryHref, title: `${product.category || 'Ürün'} Kategorisi`, desc: 'Benzer ürünleri inceleyin' },
                 { href: '/iletisim', title: 'İletişim', desc: 'Sorularınız için bizimle iletişime geçin' }
               ].map((link, index) => (
                 <motion.div

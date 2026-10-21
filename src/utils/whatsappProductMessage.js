@@ -8,7 +8,7 @@ function getProductPathSegment(productLike) {
 
 export function getProductPageUrl(productLike) {
   const seg = getProductPathSegment(productLike);
-  return seg ? `${SITE_ORIGIN}/urunler/${seg}` : `${SITE_ORIGIN}/urunler`;
+  return seg ? `${SITE_ORIGIN}/products/${seg}` : `${SITE_ORIGIN}/urunler`;
 }
 
 /**

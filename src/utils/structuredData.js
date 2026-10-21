@@ -157,7 +157,7 @@ export function getProductStructuredData(products) {
     },
     "offers": {
       "@type": "Offer",
-      "url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/urunler/${product.slug || product.id}`,
+      "url": `${process.env.NEXT_PUBLIC_BASE_URL || 'https://atkigetir.com'}/products/${product.slug || product.id}`,
       "priceCurrency": "TRY",
       "availability": "https://schema.org/InStock",
       "seller": {

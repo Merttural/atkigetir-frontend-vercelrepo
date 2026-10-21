@@ -86,7 +86,7 @@ function ProductCard({ product, showCategoryBadge = false, priority = false, isF
 
   // Resim tıklama handler'ı
   const handleImageClick = () => {
-    router.push(`/urunler/${productSlug}`);
+    router.push(`/products/${productSlug}`);
   };
 
   const handleWhatsApp = (e) => {
@@ -270,7 +270,7 @@ function ProductCard({ product, showCategoryBadge = false, priority = false, isF
       <div className={`relative ${sizeClasses.padding}`}>
         {/* Başlık ve Fiyat Sorun */}
         <div className="mb-4">
-          <Link href={`/urunler/${productSlug}`}>
+          <Link href={`/products/${productSlug}`}>
             <h3 className={`font-semibold text-[#0F172A] line-clamp-2 hover:text-[#2563EB] transition-colors leading-tight mb-1.5 ${sizeClasses.title}`}>
               {productName}
             </h3>

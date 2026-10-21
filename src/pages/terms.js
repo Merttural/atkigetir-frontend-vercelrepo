@@ -3,6 +3,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import Link from 'next/link';
 import { ArrowLeft, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { LICENSE_NOTICE_LONG } from '@/utils/licenseNotice';
 
 export default function TermsPage() {
   return (
@@ -196,7 +197,14 @@ export default function TermsPage() {
               </section>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-gray-800 mb-4">9. İletişim</h2>
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">9. Fikri Mülkiyet</h2>
+                <p className="text-gray-700 mb-4">
+                  {LICENSE_NOTICE_LONG}
+                </p>
+              </section>
+
+              <section className="mb-8">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-4">10. İletişim</h2>
                 <p className="text-gray-700 mb-4">
                   Kullanım şartları hakkında sorularınız için:
                 </p>
